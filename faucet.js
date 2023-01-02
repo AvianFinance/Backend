@@ -13,12 +13,12 @@ const signer = new ethers.Wallet("7e0dd21cba3952c769b9a90376893a351d4ac356aeacd0
 async function handler(cond, signer){
 
     if (cond==1){ // Mint a new NFT name, description and the file location is required
-        response =  await mintNFT("Adorable Cat","Trying out the infura function","Rime06.jpg",signer)
+        response =  await mintNFT("Adorable Panda","Trying out the proceed collection function","Rime07.jpg",signer)
         console.log(response)
     }
     else if (cond==2){ // list a nft to be sold in the market place, token_ID and the price is required
-        token_ID = 6
-        price = 0.04
+        token_ID = 7
+        price = 0.03
         response = await ListNFT(token_ID,price,signer)
         console.log(response)
     }
@@ -36,7 +36,7 @@ async function handler(cond, signer){
 
 }
 
-handler(3,signer)
+handler(2,signer)
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error)

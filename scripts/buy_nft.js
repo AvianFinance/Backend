@@ -2,7 +2,7 @@ const { ethers } = require("hardhat")
 const { mplace_token } = require('../config')
 const { rime_token } = require('../config')
 
-const TOKEN_ID = 5 // SET THIS BEFORE RUNNING SCRIPT
+const TOKEN_ID = 7 // SET THIS BEFORE RUNNING SCRIPT
 
 const fs = require('fs');
 const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/Marketplace.sol/Marketplace.json', 'utf-8'))
@@ -13,7 +13,7 @@ const RimeToken = JSON.parse(fs.readFileSync('./artifacts/contracts/RimeToken.so
 async function buyItem() {
 
     const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
-    const signer = new ethers.Wallet("2f3b47319ba27e3e58ae7a62ecb3966b23b9df1b8a12d1b7520f643a6d7fdc33", provider);
+    const signer = new ethers.Wallet("2f3b47319ba27e3e58ae7a62ecb3966b23b9df1b8a12d1b7520f643a6d7fdc33", provider); // Rosy credentials
 
     const mplace_contract = new ethers.Contract(mplace_token, Marketplace.abi, signer)
     const token_contract = new ethers.Contract(rime_token, RimeToken.abi, signer)
@@ -38,3 +38,7 @@ buyItem()
         console.error(error)
         process.exit(1)
     })
+
+// module.exports = {
+//     buyItem,
+// };
