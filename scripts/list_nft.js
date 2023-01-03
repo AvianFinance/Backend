@@ -1,10 +1,12 @@
 const { ethers } = require("hardhat")
 const { mplace_token } = require('../config')
 const { rime_token } = require('../config')
+const { rime_rent } = require('../config')
 
 const fs = require('fs');
 const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/Marketplace.sol/Marketplace.json', 'utf-8'))
 const RimeToken = JSON.parse(fs.readFileSync('./artifacts/contracts/RimeToken.sol/RimeToken.json', 'utf-8'))
+const RimeRent = JSON.parse(fs.readFileSync('./artifacts/contracts/RimeRent.sol/RimeRent.json', 'utf-8'))
 
 
 
