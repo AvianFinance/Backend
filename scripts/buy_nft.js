@@ -1,44 +1,39 @@
 const { ethers } = require("hardhat")
 const { mplace_token } = require('../config')
-const { rime_token } = require('../config')
-
-const TOKEN_ID = 7 // SET THIS BEFORE RUNNING SCRIPT
-
 const fs = require('fs');
+const {get_standard} = require('../services/token_standard')
 const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/Marketplace.sol/Marketplace.json', 'utf-8'))
-const RimeToken = JSON.parse(fs.readFileSync('./artifacts/contracts/RimeToken.sol/RimeToken.json', 'utf-8'))
 
+async function buyNFT(tokenID,signer,std) {
 
+    const standard = await get_standard(std)
 
-async function buyItem() {
-
-    const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
-    const signer = new ethers.Wallet("2f3b47319ba27e3e58ae7a62ecb3966b23b9df1b8a12d1b7520f643a6d7fdc33", provider); // Rosy credentials
+    const token_address = standard.addr;
+    const nft_token = standard.token;
 
     const mplace_contract = new ethers.Contract(mplace_token, Marketplace.abi, signer)
-    const token_contract = new ethers.Contract(rime_token, RimeToken.abi, signer)
+    const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
-    const listing = await mplace_contract.getListing(token_contract.address, TOKEN_ID)
+    const listing = await mplace_contract.getListing(token_contract.address, tokenID)
 
     const price = listing.price.toString()
-    const tx = await mplace_contract.buyItem(token_contract.address, TOKEN_ID, {
+    const tx = await mplace_contract.buyItem(token_contract.address, tokenID, {
             value: price,
         })
     await tx.wait(1)
     console.log("NFT Bought!")
 
-    const newOwner = await token_contract.ownerOf(TOKEN_ID)
-    console.log(
-        `New owner of Token ID ${TOKEN_ID} is ${newOwner}.`)
+    const newOwner = await token_contract.ownerOf(tokenID)
+    return(`New owner of Token ID ${tokenID} is ${newOwner}.`)
 }
 
-buyItem()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error)
-        process.exit(1)
-    })
+// buyItem()
+//     .then(() => process.exit(0))
+//     .catch((error) => {
+//         console.error(error)
+//         process.exit(1)
+//     })
 
-// module.exports = {
-//     buyItem,
-// };
+module.exports = {
+    buyNFT,
+};

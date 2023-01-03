@@ -2,9 +2,9 @@ const { uploadImage } = require('../services/PinataConnection')
 const {get_standard} = require('../services/token_standard')
 const fs = require('fs');
 
-async function mintNFT(name,desc,img_name,signer) {
+async function mintNFT(name,desc,img_name,signer,std) {
 
-    const standard = await get_standard("ERC721")
+    const standard = await get_standard(std)
 
     const token_address = standard.addr;
     const nft_token = standard.token;
@@ -35,12 +35,6 @@ async function mintToken(ipfsUrl,signer,token,address) {
     return `${tokenCounter - 1}`
 }
 
-// main()
-//     .then(() => process.exit(0))
-//     .catch((error) => {
-//         console.error(error);
-//         process.exit(1);
-//     });
 
 module.exports = {
     mintNFT,

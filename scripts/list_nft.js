@@ -1,21 +1,21 @@
 const { ethers } = require("hardhat")
 const { mplace_token } = require('../config')
-const { rime_token } = require('../config')
-const { rime_rent } = require('../config')
-
 const fs = require('fs');
+const {get_standard} = require('../services/token_standard')
+
 const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/Marketplace.sol/Marketplace.json', 'utf-8'))
-const RimeToken = JSON.parse(fs.readFileSync('./artifacts/contracts/RimeToken.sol/RimeToken.json', 'utf-8'))
-const RimeRent = JSON.parse(fs.readFileSync('./artifacts/contracts/RimeRent.sol/RimeRent.json', 'utf-8'))
 
+async function ListNFT(tokenId,amount,signer,std) {
 
+    const standard = await get_standard(std)
 
-async function ListNFT(tokenId,amount,signer) {
+    const token_address = standard.addr;
+    const nft_token = standard.token;
 
     const PRICE = ethers.utils.parseEther(amount.toString())
 
     const mplace_contract = new ethers.Contract(mplace_token, Marketplace.abi, signer)
-    const token_contract = new ethers.Contract(rime_token, RimeToken.abi, signer)
+    const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     console.log("Approving Marketplace as operator of NFT...")
     const approvalTx = await token_contract.approve(mplace_contract.address, tokenId)
@@ -33,12 +33,6 @@ async function ListNFT(tokenId,amount,signer) {
         `NFT with ID ${tokenId} listed by owner ${mintedBy}.`)
 }
 
-// List()
-//     .then(() => process.exit(0))
-//     .catch((error) => {
-//         console.error(error)
-//         process.exit(1)
-//     })
 
 module.exports = {
     ListNFT,
