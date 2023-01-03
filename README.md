@@ -26,3 +26,16 @@ List the NFT : npx hardhat run scripts/list_nft.js --network avalanche_fuji
 Update the price : npx hardhat run scripts/update_listed_nft.js --network avalanche_fuji
 
 
+npx hardhat run faucet.js --network avalanche_fuji
+
+
+
+Config settings if required
+
+  mplace_token = "0x87e402f8bdc77d2C7995b1474D7c31f87f8b03c8"
+  rime_token   = "0x4909493F604AB882327ca880ad5B330e2B3C43C1"
+  
+  module.exports = {
+      rime_token,
+      mplace_token,
+  };
