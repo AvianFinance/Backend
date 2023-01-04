@@ -33,7 +33,39 @@ async function ListNFT(tokenId,amount,signer,std) {
         `NFT with ID ${tokenId} listed by owner ${mintedBy}.`)
 }
 
+async function ListRentNFT(tokenId,amount,signer,std, sDate, eDate) {
+
+    const standard = await get_standard(std)
+
+    const token_address = standard.addr;
+    const nft_token = standard.token;
+
+    const PRICE = ethers.utils.parseEther(amount.toString())
+
+    const mplace_contract = new ethers.Contract(mplace_token, Marketplace.abi, signer)
+    const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
+
+    console.log("Approving Marketplace as operator of NFT...")
+    const approvalTx = await token_contract.approve(mplace_contract.address, tokenId)
+    await approvalTx.wait(1)
+
+    const mintedBy = await token_contract.ownerOf(tokenId)
+    const listingFee = (await mplace_contract.getListingFee()).toString();
+
+    console.log("Listing NFT...")
+    const tx = await mplace_contract.listNFT(token_contract.address, tokenId, PRICE, sDate, eDate,{
+        value: listingFee,
+    })
+
+    await tx.wait(1)
+    console.log("NFT Listed with token ID: ", tokenId.toString())
+
+    return(
+        `NFT with ID ${tokenId} listed by owner ${mintedBy}.`)
+}
+
 
 module.exports = {
     ListNFT,
+    ListRentNFT,
 };
