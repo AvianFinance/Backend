@@ -17,18 +17,22 @@ Before running un
     npm install
     npx hardhat compile 
 
+
 Deploy the nft smart contract run : npx hardhat run scripts/deploy_RimeToken.js --network avalanche_fuji
+
+
+All the functionailty is available through the faucet.js
+Change the handler as required and run with,
+
+    > node faucet.js
+
+// Not required
 
 Minting NFT : npx hardhat run scripts/mint_nft.js --network avalanche_fuji
 
 List the NFT : npx hardhat run scripts/list_nft.js --network avalanche_fuji
 
 Update the price : npx hardhat run scripts/update_listed_nft.js --network avalanche_fuji
-
-
-npx hardhat run faucet.js --network avalanche_fuji
-
-
 
 Config settings if required
 
