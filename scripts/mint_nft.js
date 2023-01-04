@@ -1,6 +1,7 @@
 const { uploadImage } = require('../services/PinataConnection')
 const {get_standard} = require('../services/token_standard')
 const fs = require('fs');
+const { ethers } = require("hardhat")
 
 async function mintNFT(name,desc,img_name,signer,std) {
 

@@ -1,5 +1,5 @@
 const { rime_token } = require('./config')
-
+const { ethers } = require("hardhat")
 const { mintNFT } = require('./scripts/mint_nft')
 const { ViewListing } = require('./scripts/view_listing')
 const { ViewRentListing } = require('./scripts/view_listing')
@@ -10,14 +10,12 @@ const { buyNFT } = require('./scripts/buy_nft')
 const { pullProceeds } = require('./scripts/get_proceeds')
 const { rentNFT } = require('./scripts/rent_nft')
 
-
-
 const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
 const signer_m = new ethers.Wallet("7e0dd21cba3952c769b9a90376893a351d4ac356aeacd0e537f5022e08593528", provider); // Meelan Credentials
 const signer_r = new ethers.Wallet("2f3b47319ba27e3e58ae7a62ecb3966b23b9df1b8a12d1b7520f643a6d7fdc33", provider); // Rosy credentials
 
 
-stand = "ERC4907"
+stand = "ERC721"
 
 async function basic_handler(cond, signer){
 
@@ -26,13 +24,13 @@ async function basic_handler(cond, signer){
         console.log(response)
     }
     else if (cond==2){ // list a nft to be sold in the market place, token_ID and the price is required
-        token_ID = 3
+        token_ID = 16
         price = 0.03
         response = await ListNFT(token_ID,price,signer,stand)
         console.log(response)
     }
     else if (cond==3){ // view the price and the listing of a NFT, token_ID is required as the input
-        token_ID = 3
+        token_ID = 16
         response = await ViewListing(token_ID,provider,stand) //Data can be read only with the provider
         console.log(response)
     }
@@ -56,7 +54,7 @@ async function basic_handler(cond, signer){
 
 async function rent_handler(cond, signer){
 
-    if (cond==1){ // Mint a new NFT name, description and the file location is required
+    if (cond==1){ // list a new NFT name, description and the file location is required
         token_ID = 4
         price = 0.01
         sDate = Math.floor(Date.now()/1000) + (60*60);
@@ -77,17 +75,17 @@ async function rent_handler(cond, signer){
     }
 }
 
-// basic_handler(1,signer_m)
-//     .then(() => process.exit(0))
-//     .catch((error) => {
-//         console.error(error)
-//         process.exit(1)
-//     })
-
-rent_handler(3,signer_r)
+basic_handler(3,provider)
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error)
         process.exit(1)
     })
+
+// rent_handler(3,signer_r)
+//     .then(() => process.exit(0))
+//     .catch((error) => {
+//         console.error(error)
+//         process.exit(1)
+//     })
 
