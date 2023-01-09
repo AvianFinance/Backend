@@ -16,6 +16,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 module.exports = {
   solidity: "0.8.17",
+  defaultNetwork: "avalanche_fuji",
   networks: {
     avalanche_fuji: {
       url: "https://avalanche-fuji.infura.io/v3/af80fbafec67441595f581fbeb7c8f1e", //"https://api.avax-test.network/ext/bc/C/rpc",

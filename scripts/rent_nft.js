@@ -1,11 +1,10 @@
 const { ethers } = require("hardhat")
 const { mplace_token } = require('../config')
-const {get_standard} = require('../services/token_standard')
 const fs = require('fs');
-
+const {get_standard} = require('../services/token_standard')
 const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/Marketplace.sol/Marketplace.json', 'utf-8'))
 
-async function ViewListing(tokenId, signer, std) {
+async function rentNFT(tokenID,signer,std,expires,amount) {
 
     const standard = await get_standard(std)
 
@@ -15,31 +14,28 @@ async function ViewListing(tokenId, signer, std) {
     const mplace_contract = new ethers.Contract(mplace_token, Marketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
-    console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getListing(token_contract.address, tokenId)
+    const now_time = Math.floor(Date.now()/1000);
 
-    return("Listing data: ", tx)
+    let value = ((expires - now_time)/60/60/24 + 1) * amount;
+
+    const price = ethers.utils.parseEther(value.toString())
+
+    const txn = await mplace_contract.rentNFT(token_contract.address, tokenID, expires, {value: price});
+
+    await txn.wait(1)
+    console.log("NFT Rented!")
+
+    const newUser = await token_contract.userOf(tokenID)
+    return(`New owner of Token ID ${tokenID} is ${newUser}.`)
 }
 
-async function ViewRentListing(signer) {
-
-    const mplace_contract = new ethers.Contract(mplace_token, Marketplace.abi, signer)
-
-    console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getAllListings()
-
-    return("Listing data: ", tx)
-}
-
-// ViewListing()
+// buyItem()
 //     .then(() => process.exit(0))
 //     .catch((error) => {
 //         console.error(error)
 //         process.exit(1)
 //     })
 
-
 module.exports = {
-    ViewListing,
-    ViewRentListing
+    rentNFT,
 };
