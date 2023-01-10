@@ -1,8 +1,10 @@
 const { ethers } = require("hardhat")
-const { mplace_token } = require('../config')
+const { amplace_token } = require('../config')
 const fs = require('fs');
 const {get_standard} = require('../services/token_standard')
-const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/Marketplace.sol/Marketplace.json', 'utf-8'))
+// const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/Marketplace.sol/Marketplace.json', 'utf-8'))
+const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianMarket.sol/AvianMarket.json', 'utf-8'))
+
 
 async function buyNFT(tokenID,signer,std) {
 
@@ -11,7 +13,7 @@ async function buyNFT(tokenID,signer,std) {
     const token_address = standard.addr;
     const nft_token = standard.token;
 
-    const mplace_contract = new ethers.Contract(mplace_token, Marketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(amplace_token, Marketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     const listing = await mplace_contract.getListing(token_contract.address, tokenID)

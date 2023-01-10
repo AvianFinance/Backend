@@ -177,7 +177,7 @@ contract AvianMarket is ReentrancyGuard {
     {
         require(isNFT(nftAddress), "Contract is not an ERC721");
         require(IERC721(nftAddress).ownerOf(tokenId) == msg.sender, "Not owner of nft");
-        require(price <= 0, "listing price should be greater than 0");
+        require(price > 0, "listing price should be greater than 0");
 
         IERC721 nft = IERC721(nftAddress);
         if (nft.getApproved(tokenId) != address(this)) {
@@ -342,7 +342,7 @@ contract AvianMarket is ReentrancyGuard {
         nonReentrant
         isOwner(nftAddress, tokenId, msg.sender)
     {
-        require(newPrice <= 0, "listing price should be greater than 0");
+        require(newPrice > 0, "listing price should be greater than 0");
 
         s_listings[nftAddress][tokenId].price = newPrice;
 
