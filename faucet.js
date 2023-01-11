@@ -21,7 +21,7 @@ stand = "ERC4907"
 async function basic_handler(cond, signer){
 
     if (cond==1){ // Mint a new NFT name, description and the file location is required
-        response =  await mintNFT("panda hug 02","Checking the new mplace","Rimer12.jpg",signer,stand)
+        response =  await mintNFT("panda coding 01","Checking the new mplace","Rimer13.jpg",signer,stand)
         console.log(response)
     }
     else if (cond==2){ // list a nft to be sold in the market place, token_ID and the price is required
@@ -60,8 +60,8 @@ async function basic_handler(cond, signer){
 async function rent_handler(cond, signer){
 
     if (cond==1){ // list a new NFT name, description and the file location is required
-        token_ID = 12
-        price = 0.03
+        token_ID = 13
+        price = 0.02
         n_days = 5
         sDate = Math.floor(Date.now()/1000) + (60*60);
         eDate = sDate + (n_days*24*60*60);
@@ -73,11 +73,11 @@ async function rent_handler(cond, signer){
         console.log(response)
     }
     else if (cond==3){ // rent the nft
-        token_ID = 12
+        token_ID = 13
         n_days = 2
-        expires = Math.floor(Date.now()/1000) + (n_days*24*60*60)
-        price = 0.03
-        response = await rentNFT(token_ID,signer,stand,expires,price) //Data can be read only with the provider
+        // expires = Math.floor(Date.now()/1000) + (n_days*24*60*60)
+        price = 0.02
+        response = await rentNFT(token_ID,signer,stand,n_days,price) //Data can be read only with the provider
         console.log(response)
     }
 }

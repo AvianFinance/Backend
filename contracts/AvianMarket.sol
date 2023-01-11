@@ -435,15 +435,17 @@ contract AvianMarket is ReentrancyGuard {
     function rentNFT(
         address nftContract,
         uint256 tokenId,
-        uint64 expires
+        uint64 numDays
     ) public payable 
         nonReentrant 
     {
         Listing_rent storage listing = r_listings[nftContract][tokenId];
         require(listing.user == address(0) || block.timestamp > listing.expires, "NFT already rented");
-        require(expires <= listing.endDateUNIX, "Rental period exceeds max date rentable");
+        // require(expires <= listing.endDateUNIX, "Rental period exceeds max date rentable");
         // Transfer rental fee
-        uint256 numDays = (expires - block.timestamp)/60/60/24 + 1;
+
+        uint64 expires = uint64(block.timestamp) + (numDays*86400);
+    
         uint256 rentalFee = listing.pricePerDay * numDays;
         require(msg.value >= rentalFee, "Not enough ether to cover rental period");
         payable(listing.owner).transfer(rentalFee);
