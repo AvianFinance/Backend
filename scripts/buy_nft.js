@@ -14,19 +14,16 @@ async function buyNFT(tokenID,signer,std) {
     const nft_token = standard.token;
 
     const mplace_contract = new ethers.Contract(amplace_token, Marketplace.abi, signer)
-    const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
+    // const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
-    const listing = await mplace_contract.getListing(token_contract.address, tokenID)
+    const listing = await mplace_contract.getListing(token_address, tokenID)
 
     const price = listing.price.toString()
-    const tx = await mplace_contract.buyItem(token_contract.address, tokenID, {
+    const tx = await mplace_contract.buyItem(token_address, tokenID, {
             value: price,
         })
     await tx.wait(1)
-    console.log("NFT Bought!")
-
-    const newOwner = await token_contract.ownerOf(tokenID)
-    return(`New owner of Token ID ${tokenID} is ${newOwner}.`)
+    return("NFT Bought!")
 }
 
 // buyItem()

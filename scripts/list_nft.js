@@ -5,8 +5,6 @@ const {get_standard} = require('../services/token_standard')
 
 const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianMarket.sol/AvianMarket.json', 'utf-8'))
 
-// const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/Marketplace.sol/Marketplace.json', 'utf-8'))
-
 async function ListNFT(tokenId,amount,signer,std) {
 
     const standard = await get_standard(std)
