@@ -30,8 +30,10 @@ contract AvianMarket is ReentrancyGuard {
     uint256 private _listingFee = .001 ether;
 
     struct Listing_sell {
+        address owner;
+        address nftContract;
+        uint256 tokenId;
         uint256 price;
-        address seller;
     }
 
     struct Listing_rent {
@@ -184,7 +186,7 @@ contract AvianMarket is ReentrancyGuard {
             revert NotApprovedForMarketplace();
         }
 
-        s_listings[nftAddress][tokenId] = Listing_sell(price, msg.sender);
+        s_listings[nftAddress][tokenId] = Listing_sell(msg.sender,nftAddress,tokenId,price);
 
         s_listed.increment();
         EnumerableSet.add(s_address_tokens[nftAddress], tokenId);
@@ -316,7 +318,7 @@ contract AvianMarket is ReentrancyGuard {
         if (msg.value < listedItem.price) {
             revert PriceNotMet(nftAddress, tokenId, listedItem.price);
         }
-        s_proceeds[listedItem.seller] += msg.value; // https://fravoll.github.io/solidity-patterns/pull_over_push.html
+        s_proceeds[listedItem.owner] += msg.value; // https://fravoll.github.io/solidity-patterns/pull_over_push.html
 
         delete s_listings[nftAddress][tokenId];
 
@@ -327,7 +329,7 @@ contract AvianMarket is ReentrancyGuard {
         }
         s_listed.decrement();
 
-        IERC721(nftAddress).safeTransferFrom(listedItem.seller, msg.sender, tokenId);
+        IERC721(nftAddress).safeTransferFrom(listedItem.owner, msg.sender, tokenId);
         emit ItemBought(msg.sender, nftAddress, tokenId, listedItem.price);
     }
 
