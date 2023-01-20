@@ -21,12 +21,12 @@ stand = "ERC4907"
 async function basic_handler(cond, signer){
 
     if (cond==1){ // Mint a new NFT name, description and the file location is required
-        response =  await mintNFT("cute panda sleeping","Checking the avian market","Rimer18.jpg",signer,stand)
+        response =  await mintNFT("cute panda test 02","Checking the avian market","Rimer22.jpg",signer,stand)
         console.log(response)
     }
     else if (cond==2){ // list a nft to be sold in the market place, token_ID and the price is required
-        token_ID = 18
-        price = 0.08
+        token_ID = 21
+        price = 0.04
         response = await ListNFT(token_ID,price,signer,stand)
         console.log(response)
     }
@@ -42,7 +42,7 @@ async function basic_handler(cond, signer){
         console.log(response)
     }
     else if (cond==5){ // buys the listed nft
-        token_ID = 27
+        token_ID = 21
         response = await buyNFT(token_ID,signer,stand) //Data can be read only with the provider
         console.log(response)
     }
@@ -60,7 +60,7 @@ async function basic_handler(cond, signer){
 async function rent_handler(cond, signer){
 
     if (cond==1){ // list a new NFT name, description and the file location is required
-        token_ID = 17
+        token_ID = 22
         price = 0.05
         n_days = 30
         sDate = Math.floor(Date.now()/1000) + (60*60);
@@ -73,26 +73,26 @@ async function rent_handler(cond, signer){
         console.log(response)
     }
     else if (cond==3){ // rent the nft
-        token_ID = 13
+        token_ID = 22
         n_days = 2
         // expires = Math.floor(Date.now()/1000) + (n_days*24*60*60)
-        price = 0.02
+        price = 0.05
         response = await rentNFT(token_ID,signer,stand,n_days,price) //Data can be read only with the provider
         console.log(response)
     }
 }
 
-basic_handler(7,signer_m)
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error)
-        process.exit(1)
-    })
-
-// rent_handler(2,signer_r)
+// basic_handler(1,signer_m)
 //     .then(() => process.exit(0))
 //     .catch((error) => {
 //         console.error(error)
 //         process.exit(1)
 //     })
+
+rent_handler(2,signer_r)
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error)
+        process.exit(1)
+    })
 
