@@ -1,0 +1,232 @@
+This document provides end-end details on how to use the AvianMarket abi. Document is structured in to following sections.
+
+For ERC721,ERC4907
+
+    > How to list a NFT for selling
+        
+        Function to be used : AvianMarket.listItem(token_address, token_ID, PRICE)
+
+        Returns : Nothing
+
+        Emits : ItemListed(msg.sender, token_address, token_ID, PRICE) event
+        
+        Parameters:
+
+            token_address - token address pointing to the collection of the referred NFT
+            token_ID      - ID of the NFT 
+            PRICE         - Price of the NFT 
+
+
+    > How to view a single NFT listing
+
+        Function to be used : AvianMarket.getListing(token_address, token_ID)
+
+        Returns : 
+
+                {
+                    address owner; 
+                    address token_address;
+                    uint256 token_ID;
+                    uint256 PRICE; 
+                }
+
+        Emits : Nothing
+        
+        Parameters :
+
+            token_address - token address pointing to the collection of the referred NFT
+            token_ID      - ID of the NFT 
+            owner         - Owner of the NFT
+            PRICE         - Price of the NFT
+
+
+    > How to view all available listings
+
+        Function to be used : AvianMarket.getSellListings()
+
+        Returns : A list of following structs
+
+                {
+                    address owner;
+                    address token_address;
+                    uint256 token_ID;
+                    uint256 PRICE;
+                }
+
+        Emits : Nothing
+
+        Parameters : 
+
+            token_address - token address pointing to the collection of the referred NFT
+            token_ID      - ID of the NFT 
+            owner         - Owner of the NFT
+            PRICE         - Price of the NFT
+
+    > How to update a NFT sell list
+
+        Function to be used : AvianMarket.updateListing(token_address, token_ID, PRICE)
+
+        Returns : Nothing
+
+        Emits : ItemListed(msg.sender, token_address, token_ID, PRICE) event
+
+        Parameters:
+
+            token_address - token address pointing to the collection of the referred NFT
+            token_ID      - ID of the NFT 
+            PRICE         - New price of the NFT 
+
+
+    > How to buy a listed NFT
+
+        Function to be used : AvianMarket.buyItem(token_address,token_ID,{value: price})
+
+        Returns : Nothing
+
+        Emits : ItemListed(msg.sender, token_address, token_ID, PRICE) event
+
+        Parameters:
+
+            token_address - token address pointing to the collection of the referred NFT
+            token_ID      - ID of the NFT 
+            PRICE         - Price of the NFT 
+
+    > How to unlist a NFT sell list
+
+        Function to be used : AvianMarket.cancelListing(token_address, token_ID)
+
+        Returns : Nothing
+
+        Emits : ItemCanceled(msg.sender, token_address, token_ID) event
+
+        Parameters:
+
+            token_address - token address pointing to the collection of the referred NFT
+            token_ID      - ID of the NFT 
+
+Only for ERC4907
+
+    > How to list a NFT for renting 
+
+        Function to be used : AvianMarket.listNFT(token_address, token_ID, pricePerDay, sDate, eDate,{value: listingFee})
+
+        Returns : Nothing
+
+        Emits : NFTListed(
+                            IERC721(nftAddress).ownerOf(tokenId),
+                            address(0),
+                            token_address,
+                            token_ID,
+                            pricePerDay,
+                            sDate,
+                            eDate,
+                            0
+                        );
+
+        Parameters:
+
+            token_address - token address pointing to the collection of the referred NFT
+            token_ID      - ID of the NFT 
+            pricePerDay   - price per day for the listing
+            sDate         - start of the renting period in seconds unix
+            eDate         - end of the renting period in seconds unix
+            listingFee    - listing fee defined by the market
+
+
+    > How to unlist a rent listed NFT
+
+        Function to be used : AvianMarket.unlistNFT(token_address,token_ID) 
+        
+        Returns : Nothing
+
+        Emits : NFTUnlisted(msg.sender,token_address,token_ID,refund) event
+
+        Parameters:
+
+            token_address - token address pointing to the collection of the referred NFT
+            token_ID      - ID of the NFT 
+            refund        - refund amount for the current user
+
+
+    > How to rent a NFT listed
+
+        Function to be used : AvianMarket.rentNFT(token_address, token_ID, days, {value: rentalFee})
+        
+        Returns : Nothing
+
+        Emits :  
+        
+        NFTRented(
+            IERC721(nftContract).ownerOf(tokenId),
+            msg.sender,
+            token_address,
+            token_ID,
+            listing.startDateUNIX,
+            listing.endDateUNIX,
+            expires,
+            rentalFee
+        ); 
+
+        Parameters:
+
+            token_address - token address pointing to the collection of the referred NFT
+            token_ID      - ID of the NFT 
+            days          - days for the rental contract to exist
+            expires       - when the agreement expires in unix seconds
+            rentalFee     - amount paid for the rental
+
+
+    > How to view all available listings
+
+        Function to be used : AvianMarket.getRentListings()
+
+        Returns : A list of following structs
+               
+                {
+                    address owner;
+                    address user;
+                    address token_address;
+                    uint256 token_ID;
+                    uint256 pricePerDay;
+                    uint256 startDateUNIX; 
+                    uint256 endDateUNIX; 
+                    uint256 expires;
+                }
+
+        Emits : Nothing
+
+        Parameters : 
+
+            token_address - token address pointing to the collection of the referred NFT
+            token_ID      - ID of the NFT 
+            owner         - Owner of the NFT
+            user          - user of the NFT
+            startDateUNIX - when the nft can start being rented
+            endDateUNIX   - when the nft can no longer be rented
+            expires;      - when the user can no longer rent it
+
+
+For Transactions
+
+    > How to view any available proceeds from past transactions
+
+        Function to be used : AvianMarketgetProceeds(seller_address) 
+        
+        Returns : The amount available for the seller
+
+        Emits : Nothing
+
+        Parameters:
+
+            seller_address - address of the seller whom to see the available proceeds
+
+
+    > How to withdraw any available proceeds (When mutiple transactions are done within a single function)
+
+        Function to be used : AvianMarket.mplace_contract.withdrawProceeds()
+        
+        Returns : Nothing
+
+        Emits : Nothing
+
+        Parameters: Nothing

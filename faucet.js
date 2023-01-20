@@ -1,8 +1,9 @@
 const { rime_token } = require('./config')
 const { ethers } = require("hardhat")
 const { mintNFT } = require('./scripts/mint_nft')
-const { ViewListing } = require('./scripts/view_listing')
+const { ViewASellListing } = require('./scripts/view_listing')
 const { ViewRentListing } = require('./scripts/view_listing')
+const { ViewSellListing } = require('./scripts/view_listing')
 const { ListNFT } = require('./scripts/list_nft')
 const { ListRentNFT } = require('./scripts/list_nft')
 const { UpdateListing } = require('./scripts/update_listed_nft')
@@ -20,33 +21,37 @@ stand = "ERC4907"
 async function basic_handler(cond, signer){
 
     if (cond==1){ // Mint a new NFT name, description and the file location is required
-        response =  await mintNFT("Panda Rent 03","Trying out the rent functionality","Rimer06.jpg",signer,stand)
+        response =  await mintNFT("cute panda test 02","Checking the avian market","Rimer22.jpg",signer,stand)
         console.log(response)
     }
     else if (cond==2){ // list a nft to be sold in the market place, token_ID and the price is required
-        token_ID = 5
-        price = 0.03
+        token_ID = 21
+        price = 0.04
         response = await ListNFT(token_ID,price,signer,stand)
         console.log(response)
     }
     else if (cond==3){ // view the price and the listing of a NFT, token_ID is required as the input
-        token_ID = 5
-        response = await ViewListing(token_ID,provider,stand) //Data can be read only with the provider
+        token_ID = 27
+        response = await ViewASellListing(token_ID,provider,stand) //Data can be read only with the provider
         console.log(response)
     }
     else if (cond==4){ // update the price of a NFT, token_ID is required as the input
-        token_ID = 5
-        price = 0.05
+        token_ID = 27
+        price = 0.04
         response = await UpdateListing(token_ID,price,signer,stand) //Data can be read only with the provider
         console.log(response)
     }
     else if (cond==5){ // buys the listed nft
-        token_ID = 5
+        token_ID = 21
         response = await buyNFT(token_ID,signer,stand) //Data can be read only with the provider
         console.log(response)
     }
     else if (cond==6){ // pulls available proceeds
         response = await pullProceeds(signer) //Data can be read only with the provider
+        console.log(response)
+    }
+    else if (cond==7){ // pulls available proceeds
+        response = await ViewSellListing(provider) //Data can be read only with the provider
         console.log(response)
     }
 
@@ -55,9 +60,9 @@ async function basic_handler(cond, signer){
 async function rent_handler(cond, signer){
 
     if (cond==1){ // list a new NFT name, description and the file location is required
-        token_ID = 6
-        price = 0.01
-        n_days = 5
+        token_ID = 22
+        price = 0.05
+        n_days = 30
         sDate = Math.floor(Date.now()/1000) + (60*60);
         eDate = sDate + (n_days*24*60*60);
         response =  await ListRentNFT(token_ID,price,signer,stand,sDate,eDate)
@@ -68,11 +73,11 @@ async function rent_handler(cond, signer){
         console.log(response)
     }
     else if (cond==3){ // rent the nft
-        token_ID = 6
-        n_days = 1
-        expires = Math.floor(Date.now()/1000) + (n_days*24*60*60)
-        price = 0.01
-        response = await rentNFT(token_ID,signer,stand,expires,price) //Data can be read only with the provider
+        token_ID = 22
+        n_days = 2
+        // expires = Math.floor(Date.now()/1000) + (n_days*24*60*60)
+        price = 0.05
+        response = await rentNFT(token_ID,signer,stand,n_days,price) //Data can be read only with the provider
         console.log(response)
     }
 }
@@ -84,7 +89,7 @@ async function rent_handler(cond, signer){
 //         process.exit(1)
 //     })
 
-rent_handler(3,signer_r)
+rent_handler(2,signer_r)
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error)
