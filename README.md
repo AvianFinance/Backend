@@ -1,49 +1,35 @@
-# Sample Hardhat Project
+This is the implementation of the AvianMarket platform implemented with Solidity on Avalanche Fuji Testnet.
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+Follow the below step to generate a working project.
 
-Try running some of the following tasks:
+> Step 01 : Clone the repository to your local directory.
+> Step 02 : In a terminal opened in the cloned directory run,
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
-```
+            npm install 
 
-Before running un
+            This should install all the required dependencies, node_modules folder will be added to the directory. 
+        
+> Step 03 : Compile the smart contracts available in the contracts folder, via
 
-    npm install
-    npx hardhat compile 
+            npx hardhat compile
 
+            This should create a folder called artifcats, it will hold the compiled versions of the smart contracts.
 
-Deploy the nft smart contract run : npx hardhat run scripts/deploy_RimeToken.js --network avalanche_fuji
+> Step 04: Go to the faucet.js and run one of the two functions with edits as required via,
+
+            node faucet.js
 
 
-All the functionailty is available through the faucet.js
-Change the handler as required and run with,
+In case you require to deploy your own version of the smart contract:
 
-    > node faucet.js
+> Step 01 : Choose the smart contract you want from the contracts folder.
 
-// Not required
+> Step 02 : Do any required modification in the constructor.
 
-Minting NFT : npx hardhat run scripts/mint_nft.js --network avalanche_fuji
+> Step 03 : Compile the smart contract via,
 
-List the NFT : npx hardhat run scripts/list_nft.js --network avalanche_fuji
+            npx hardhat compile
 
-Update the price : npx hardhat run scripts/update_listed_nft.js --network avalanche_fuji
+> Step 04 : Deploy the contract to fuji testnet via,
 
-Config settings if required
-
-amplace_token = "0x15c1B49EF69070d21C5c1DaE0598999d5dc83F0e"
-mplace_token = "0xC2AA1764dcf714DEbf762b95aBBaDE411eD35B2c"
-rime_token   = "0x4909493F604AB882327ca880ad5B330e2B3C43C1"
-rime_rent = "0xA5e80F4980878b7C2c23D6fA002358A47d0060a3"
-
-module.exports = {
-    rime_token,
-    mplace_token,
-    rime_rent,
-    amplace_token,
-};
+            npx hardhat run scripts/deploy_RimeToken.js --network avalanche_fuji
