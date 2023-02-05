@@ -44,7 +44,7 @@ async function ViewSellListedAddrs(provider) {
     const mplace_contract = new ethers.Contract(amplace_token, Marketplace.abi, provider)
 
     console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getSListedAdddresses()
+    const tx = await mplace_contract.getSListedAdddresses() // Gives all the token addresses listed for selling
 
     return("Listing data: ", tx)
 }
@@ -57,7 +57,7 @@ async function ViewSellListedAddrTokens(std,provider) {
     const mplace_contract = new ethers.Contract(amplace_token, Marketplace.abi, provider)
 
     console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getSListedAdddressTokens(token_address)
+    const tx = await mplace_contract.getSListedAdddressTokens(token_address) // when the token address is given gives the token ids listed for selling
 
     return("Listing data: ", tx)
 }
@@ -67,7 +67,7 @@ async function ViewRentListedAddrs(provider) {
     const mplace_contract = new ethers.Contract(amplace_token, Marketplace.abi, provider)
 
     console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getRListedAdddresses()
+    const tx = await mplace_contract.getRListedAdddresses() // Gives all the token addresses listed for renting
 
     return("Listing data: ", tx)
 }
@@ -80,7 +80,7 @@ async function ViewRentListedAddrTokens(std,provider) {
     const mplace_contract = new ethers.Contract(amplace_token, Marketplace.abi, provider)
 
     console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getRListedAdddressTokens(token_address)
+    const tx = await mplace_contract.getRListedAdddressTokens(token_address) // when the token address is given gives the token ids listed for renting
 
     return("Listing data: ", tx)
 }

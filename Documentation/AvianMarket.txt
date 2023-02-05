@@ -19,7 +19,7 @@ For ERC721,ERC4907
 
     > How to view a single NFT listing
 
-        Function to be used : AvianMarket.getListing(token_address, token_ID)
+        Function to be used : AvianMarket.getASListing(token_address, token_ID)
 
         Returns : 
 
