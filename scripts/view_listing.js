@@ -2,7 +2,7 @@ const { ethers } = require("hardhat")
 const { amplace_token } = require('../config')
 const {get_standard} = require('../services/token_standard')
 const fs = require('fs');
-const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianMarket.sol/AvianMarket.json', 'utf-8'))
+const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianMarkett.sol/AvianMarkett.json', 'utf-8'))
 
 
 async function ViewASellListing(tokenId, signer, std) {
@@ -39,9 +39,59 @@ async function ViewRentListing(provider) {
     return("Listing data: ", tx)
 }
 
+async function ViewSellListedAddrs(provider) {
+
+    const mplace_contract = new ethers.Contract(amplace_token, Marketplace.abi, provider)
+
+    console.log("Retrieving NFT listing data...")
+    const tx = await mplace_contract.getSListedAdddresses()
+
+    return("Listing data: ", tx)
+}
+
+async function ViewSellListedAddrTokens(std,provider) {
+
+    const standard = await get_standard(std)
+    const token_address = standard.addr;
+
+    const mplace_contract = new ethers.Contract(amplace_token, Marketplace.abi, provider)
+
+    console.log("Retrieving NFT listing data...")
+    const tx = await mplace_contract.getSListedAdddressTokens(token_address)
+
+    return("Listing data: ", tx)
+}
+
+async function ViewRentListedAddrs(provider) {
+
+    const mplace_contract = new ethers.Contract(amplace_token, Marketplace.abi, provider)
+
+    console.log("Retrieving NFT listing data...")
+    const tx = await mplace_contract.getRListedAdddresses()
+
+    return("Listing data: ", tx)
+}
+
+async function ViewRentListedAddrTokens(std,provider) {
+
+    const standard = await get_standard(std)
+    const token_address = standard.addr;
+
+    const mplace_contract = new ethers.Contract(amplace_token, Marketplace.abi, provider)
+
+    console.log("Retrieving NFT listing data...")
+    const tx = await mplace_contract.getRListedAdddressTokens(token_address)
+
+    return("Listing data: ", tx)
+}
+
 
 module.exports = {
     ViewASellListing,
     ViewRentListing,
-    ViewSellListing
+    ViewSellListing,
+    ViewSellListedAddrs,
+    ViewRentListedAddrs,
+    ViewSellListedAddrTokens,
+    ViewRentListedAddrTokens,
 };

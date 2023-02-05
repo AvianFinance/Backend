@@ -24,7 +24,7 @@ In case you require to deploy your own version of the smart contract:
 
 > Step 01 : Choose the smart contract you want from the contracts folder.
 
-> Step 02 : Do any required modification in the constructor.
+> Step 02 : Do any required modification in the code.
 
 > Step 03 : Compile the smart contract via,
 
@@ -33,3 +33,5 @@ In case you require to deploy your own version of the smart contract:
 > Step 04 : Deploy the contract to fuji testnet via,
 
             npx hardhat run scripts/deploy_RimeToken.js --network avalanche_fuji
+
+

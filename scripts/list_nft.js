@@ -3,7 +3,7 @@ const { amplace_token } = require('../config')
 const fs = require('fs');
 const {get_standard} = require('../services/token_standard')
 
-const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianMarket.sol/AvianMarket.json', 'utf-8'))
+const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianMarkett.sol/AvianMarkett.json', 'utf-8'))
 
 async function ListNFT(tokenId,amount,signer,std) {
 

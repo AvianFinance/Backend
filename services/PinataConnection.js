@@ -13,8 +13,8 @@ async function uploadToPinata(image, name, tokenId, nft_title, nft_desc) {
     const formData = new FormData()
     formData.append('file', image, name)
 
-    const API_KEY = "2753cde849ecff5b855b"
-    const API_SECRET = "93daab4ff545ead8cec785ff9f07db3a519a58c630041e34f2260959d6b2303f"
+    const API_KEY = "668b0b44d1e4a05bc600"
+    const API_SECRET = "974f70a719445d92a968a34fc3dea98ad2a4064f4ef7e0c9283a7c1b29af8e71"
 
     // the endpoint needed to upload the file
     const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`
@@ -36,8 +36,8 @@ async function uploadToPinata(image, name, tokenId, nft_title, nft_desc) {
 
 async function sendMetadata(IPFSHash, nft_title, nft_desc, tokenId) {
 
-    const API_KEY = "2753cde849ecff5b855b"
-    const API_SECRET = "93daab4ff545ead8cec785ff9f07db3a519a58c630041e34f2260959d6b2303f"
+    const API_KEY = "668b0b44d1e4a05bc600"
+    const API_SECRET = "974f70a719445d92a968a34fc3dea98ad2a4064f4ef7e0c9283a7c1b29af8e71"
     const JSONBody = {
         name: nft_title,
         tokenId: tokenId,
