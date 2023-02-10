@@ -13,7 +13,7 @@ async function ViewASellListing(tokenId, signer, std) {
     const mplace_contract = new ethers.Contract(amplace_token, Marketplace.abi, signer)
 
     console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getListing(token_address, tokenId)
+    const tx = await mplace_contract.getASListing(token_address, tokenId)
 
     return("Listing data: ", tx)
 }
