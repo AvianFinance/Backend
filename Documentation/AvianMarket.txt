@@ -62,7 +62,7 @@ For ERC721,ERC4907
             owner         - Owner of the NFT
             PRICE         - Price of the NFT
 
-    > How to update a NFT sell list
+    > How to update a NFT sell listing
 
         Function to be used : AvianMarket.updateListing(token_address, token_ID, PRICE)
 

@@ -25,12 +25,12 @@ stand = "ERC721"
 async function basic_handler(cond, signer){
 
     if (cond==1){ // Mint a new NFT name, description and the file location is required
-        response =  await mintNFT("cute bear 06","Checking market update","Bear06.jpg",signer,stand)
+        response =  await mintNFT("cute bear 12","Checking market update","Bear12.jpg",signer,stand)
         console.log(response)
     }
     else if (cond==2){ // list a nft to be sold in the market place, token_ID and the price is required
-        token_ID = 36
-        price = 0.06
+        token_ID = 39
+        price = 0.08
         response = await ListNFT(token_ID,price,signer,stand)
         console.log(response)
     }
@@ -101,7 +101,7 @@ async function rent_handler(cond, signer){
     }
 }
 
-basic_handler(3,signer_m)
+basic_handler(2,signer_r)
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error)
