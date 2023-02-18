@@ -6,17 +6,13 @@
 ### Listing a NFT to Sell
 
 ```
-function listItem(address nftAddress, uint256 tokenId, uint256 price)
+    const tx = await mplace_contract.listItem(token_contract.address, tokenId, PRICE)
 ```
 
 ### Updating an existing NFT
 
 ```
-    function updateListing(
-        address nftAddress,
-        uint256 tokenId,
-        uint256 newPrice
-    )
+    const tx = await mplace_contract.updateListing(token_address, tokenId, PRICE)
 ```
 
 ### Unlisting an already listed NFT to Sell
@@ -31,13 +27,9 @@ function listItem(address nftAddress, uint256 tokenId, uint256 price)
 ### Listing a NFT to Rent
 
 ```
-    function listNFT(
-        address nftAddress,
-        uint256 tokenId,
-        uint256 pricePerDay,
-        uint256 startDateUNIX,
-        uint256 endDateUNIX
-    )
+    const tx =  await mplace_contract.listNFT(token_contract.address, tokenId, PRICE, sDate, eDate,{
+                    value: listingFee,
+                })
 ```
 
 ### Unlisting an already listed NFT to Rent
@@ -54,10 +46,9 @@ function listItem(address nftAddress, uint256 tokenId, uint256 price)
 ### Buying an already listed NFT
 
 ```
-    function buyItem(         
-        address nftAddress, 
-        uint256 tokenId
-    )
+    const tx =  await mplace_contract.buyItem(token_address, tokenID, {
+                    value: price,
+                })
 ```
 
 ## Renting Functionality
@@ -65,11 +56,9 @@ function listItem(address nftAddress, uint256 tokenId, uint256 price)
 ### Renting an already listed NFT to Rent
 
 ```
-    function rentNFT(
-        address nftContract,
-        uint256 tokenId,
-        uint64 numDays
-    )
+const txn = await mplace_contract.rentNFT(token_address, tokenID, days, {
+                value: price
+            }) 
 ```
 
 ## Handling Proceeds
@@ -83,7 +72,7 @@ function listItem(address nftAddress, uint256 tokenId, uint256 price)
 ### Get available proceeds
 
 ```
-    function withdrawProceeds()
+    const tx = await mplace_contract.withdrawProceeds()
 ```
 
 ## Getter functions for Buy/Sell
@@ -91,25 +80,25 @@ function listItem(address nftAddress, uint256 tokenId, uint256 price)
 ### View available listings for selling
 
 ```
-    function getSellListings()
+    const tx = await mplace_contract.getSellListings()
 ```
 
 ### View collection addresses listed to sell
 
 ```
-    function getSListedAdddresses()
+    const tx = await mplace_contract.getSListedAdddresses()
 ```
 
 ### View token ids of a given collection, listed to sell
 
 ```
-    function getSListedAdddressTokens(address nftAddress)
+    const tx = await mplace_contract.getSListedAdddressTokens(token_address)
 ```
 
 ### View price info of a sell single listing
 
 ```
-    function getASListing(address nftAddress, uint256 tokenId)
+    const tx = await mplace_contract.getASListing(token_address, tokenId)
 ```
 
 
@@ -118,25 +107,25 @@ function listItem(address nftAddress, uint256 tokenId, uint256 price)
 ### View available listings for renting
 
 ```
-    function getRentListings()
+    const tx = await mplace_contract.getRentListings()
 ```
 
 ### View collection addresses listed to rent
 
 ```
-    function getRListedAdddresses()
+    const tx = await mplace_contract.getRListedAdddresses()
 ```
 
 ### View token ids of a given collection, listed to rent
 
 ```
-    function getRListedAdddressTokens(address nftAddress)
+    const tx = await mplace_contract.getRListedAdddressTokens(token_address)
 ```
 
 ### View price info of a single rent listing
 
 ```
-    function getARListing(address nftAddress, uint256 tokenId)
+    const tx = await mplace_contract.getARListing(token_address, tokenId)
 ```
 
 ## Service Functions
@@ -144,19 +133,19 @@ function listItem(address nftAddress, uint256 tokenId, uint256 price)
 ### View the listing charge for rental lists
 
 ```
-    function getListingFee()
+    const listingFee = (await mplace_contract.getListingFee()).toString();
 ```
 
 ### Check whether a contract is 4907 or not
 
 ```
-    function isRentableNFT(address nftContract)
+    const tx = await mplace_contract.isRentableNFT(address nftContract)
 ```
 
 ### Check whether a contract is 721 or not
 
 ```
-    function isNFT(address nftContract)
+    const tx = await mplace_contract.isNFT(address nftContract)
 ```
 
 
