@@ -18,9 +18,10 @@ const { rentNFT } = require('./scripts/rent_nft')
 const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
 const signer_m = new ethers.Wallet("7e0dd21cba3952c769b9a90376893a351d4ac356aeacd0e537f5022e08593528", provider); // Meelan Credentials
 const signer_r = new ethers.Wallet("2f3b47319ba27e3e58ae7a62ecb3966b23b9df1b8a12d1b7520f643a6d7fdc33", provider); // Rosy credentials
+const signer_i = new ethers.Wallet("986815db062b75efa84cd38ea93e08e9e13a42ee9493f756c1bc661d06201e68", provider); // Meelan Credentials
 
 
-stand = "ERC721"
+stand = "ERC4907"
 
 async function basic_handler(cond, signer){
 
@@ -29,7 +30,7 @@ async function basic_handler(cond, signer){
         console.log(response)
     }
     else if (cond==2){ // list a nft to be sold in the market place, token_ID and the price is required
-        token_ID = 39
+        token_ID = 5
         price = 0.08
         response = await ListNFT(token_ID,price,signer,stand)
         console.log(response)
@@ -71,8 +72,8 @@ async function basic_handler(cond, signer){
 async function rent_handler(cond, signer){
 
     if (cond==1){ // list a new NFT name, description and the file location is required
-        token_ID = 31
-        price = 0.07
+        token_ID = 3
+        price = 0.08
         n_days = 30
         sDate = Math.floor(Date.now()/1000) + (60*60);
         eDate = sDate + (n_days*24*60*60);
@@ -101,17 +102,17 @@ async function rent_handler(cond, signer){
     }
 }
 
-basic_handler(2,signer_r)
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error)
-        process.exit(1)
-    })
-
-// rent_handler(4,signer_r)
+// basic_handler(2,signer_i)
 //     .then(() => process.exit(0))
 //     .catch((error) => {
 //         console.error(error)
 //         process.exit(1)
 //     })
+
+rent_handler(2,signer_i)
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error)
+        process.exit(1)
+    })
 
