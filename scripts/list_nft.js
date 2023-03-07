@@ -1,9 +1,11 @@
 const { ethers } = require("hardhat")
 const { amplace_token } = require('../config')
+const { insmplace_token } = require('../config')
 const fs = require('fs');
 const {get_standard} = require('../services/token_standard')
 
 const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianMarkett.sol/AvianMarkett.json', 'utf-8'))
+const InsMarketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianInstallment.sol/AvianInstallment.json', 'utf-8'))
 
 async function ListNFT(tokenId,amount,signer,std) {
 
@@ -65,6 +67,37 @@ async function ListRentNFT(tokenId,amount,signer,std, sDate, eDate) {
 }
 
 
+async function ListInsNFT(tokenId,amount,signer,std, sDate, eDate, insCount) {
+
+    const standard = await get_standard(std)
+
+    const token_address = standard.addr;
+    const nft_token = standard.token;
+
+    const PRICE = ethers.utils.parseEther(amount.toString())
+
+    const mplace_contract = new ethers.Contract(insmplace_token, InsMarketplace.abi, signer)
+    const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
+
+    console.log("Approving Marketplace as operator of NFT...")
+    const approvalTx = await token_contract.approve(mplace_contract.address, tokenId)
+    await approvalTx.wait(1)
+
+    const mintedBy = await token_contract.ownerOf(tokenId)
+    const listingFee = (await mplace_contract.getListingFee()).toString();
+
+    console.log("Listing NFT...")
+    const tx = await mplace_contract.listInsBasedNFT(token_contract.address, tokenId, PRICE, sDate, eDate, insCount, {
+        value: listingFee,
+    })
+
+    await tx.wait(1)
+    console.log("NFT Listed with token ID: ", tokenId.toString())
+
+    return(
+        `NFT with ID ${tokenId} listed by owner ${mintedBy}.`)
+}
+
 // buyItem()
 //     .then(() => process.exit(0))
 //     .catch((error) => {
@@ -77,4 +110,5 @@ async function ListRentNFT(tokenId,amount,signer,std, sDate, eDate) {
 module.exports = {
     ListNFT,
     ListRentNFT,
+    ListInsNFT
 };

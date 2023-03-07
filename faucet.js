@@ -3,6 +3,7 @@ const { ethers } = require("hardhat")
 const { mintNFT } = require('./scripts/mint_nft')
 const { ViewASellListing } = require('./scripts/view_listing')
 const { ViewRentListing } = require('./scripts/view_listing')
+const { ViewAInsListing } = require('./scripts/view_listing')
 const { ViewSellListing } = require('./scripts/view_listing')
 const { ViewSellListedAddrs } = require('./scripts/view_listing')
 const { ViewSellListedAddrTokens } = require('./scripts/view_listing')
@@ -10,6 +11,7 @@ const { ViewRentListedAddrs } = require('./scripts/view_listing')
 const { ViewRentListedAddrTokens } = require('./scripts/view_listing')
 const { ListNFT } = require('./scripts/list_nft')
 const { ListRentNFT } = require('./scripts/list_nft')
+const { ListInsNFT } = require('./scripts/list_nft')
 const { UpdateListing } = require('./scripts/update_listed_nft')
 const { buyNFT } = require('./scripts/buy_nft')
 const { pullProceeds } = require('./scripts/get_proceeds')
@@ -26,7 +28,7 @@ stand = "ERC4907"
 async function basic_handler(cond, signer){
 
     if (cond==1){ // Mint a new NFT name, description and the file location is required
-        response =  await mintNFT("Beauty Box 04","Beautiful lancer box 04","box4.jpg",signer,stand)
+        response =  await mintNFT("cute panda 2222","Beautiful panda","panda.jpg",signer,stand)
         console.log(response)
     }
     else if (cond==2){ // list a nft to be sold in the market place, token_ID and the price is required
@@ -102,12 +104,47 @@ async function rent_handler(cond, signer){
     }
 }
 
-basic_handler(2,signer_i)
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error)
-        process.exit(1)
-    })
+async function ins_handler(cond, signer){
+
+    if (cond==1){ // list a new NFT name, description and the file location is required
+        token_ID = 32
+        price = 0.03
+        n_days = 30
+        sDate = Math.floor(Date.now()/1000) + (60*60);
+        eDate = sDate + (n_days*24*60*60);
+        inscount = 5
+        response =  await ListInsNFT(token_ID,price,signer,stand,sDate,eDate,inscount)
+        console.log(response)
+    }
+    else if (cond==2){ // view the price and the listing of a NFT, token_ID is required as the input
+        token_ID = 32
+        response = await ViewAInsListing(token_ID,provider,stand) //Data can be read only with the provider
+        console.log(response)
+    }
+    else if (cond==3){ // rent the nft
+        token_ID = 22
+        n_days = 2
+        // expires = Math.floor(Date.now()/1000) + (n_days*24*60*60)
+        price = 0.05
+        response = await rentNFT(token_ID,signer,stand,n_days,price) //Data can be read only with the provider
+        console.log(response)
+    }
+    else if (cond==4){ // pulls available proceeds
+        response = await ViewRentListedAddrs(provider) //Data can be read only with the provider
+        console.log(response)
+    }
+    else if (cond==5){ // pulls available proceeds
+        response = await ViewRentListedAddrTokens(stand,provider) //Data can be read only with the provider
+        console.log(response)
+    }
+}
+
+// basic_handler(1,signer_m)
+//     .then(() => process.exit(0))
+//     .catch((error) => {
+//         console.error(error)
+//         process.exit(1)
+//     })
 
 // rent_handler(2,signer_i)
 //     .then(() => process.exit(0))
@@ -115,4 +152,11 @@ basic_handler(2,signer_i)
 //         console.error(error)
 //         process.exit(1)
 //     })
+
+ins_handler(2,signer_m)
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error)
+        process.exit(1)
+    })
 

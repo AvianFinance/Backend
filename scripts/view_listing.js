@@ -1,8 +1,10 @@
 const { ethers } = require("hardhat")
 const { amplace_token } = require('../config')
+const { insmplace_token } = require('../config')
 const {get_standard} = require('../services/token_standard')
 const fs = require('fs');
 const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianMarkett.sol/AvianMarkett.json', 'utf-8'))
+const InsMarketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianInstallment.sol/AvianInstallment.json', 'utf-8'))
 
 
 async function ViewASellListing(tokenId, signer, std) {
@@ -85,6 +87,21 @@ async function ViewRentListedAddrTokens(std,provider) {
     return("Listing data: ", tx)
 }
 
+//////////////// Ins based
+
+async function ViewAInsListing(tokenId, signer, std) {
+
+    const standard = await get_standard(std)
+    const token_address = standard.addr;
+
+    const mplace_contract = new ethers.Contract(insmplace_token, InsMarketplace.abi, signer)
+
+    console.log("Retrieving NFT listing data...")
+    const tx = await mplace_contract.getAINSListing(token_address, tokenId)
+
+    return("Listing data: ", tx)
+}
+
 
 module.exports = {
     ViewASellListing,
@@ -94,4 +111,5 @@ module.exports = {
     ViewRentListedAddrs,
     ViewSellListedAddrTokens,
     ViewRentListedAddrTokens,
+    ViewAInsListing,
 };
