@@ -14,6 +14,7 @@ const { UpdateListing } = require('./scripts/update_listed_nft')
 const { buyNFT } = require('./scripts/buy_nft')
 const { pullProceeds } = require('./scripts/get_proceeds')
 const { rentNFT } = require('./scripts/rent_nft')
+const {ListInsNFT,ViewAInsListing,view_installment,unlist_nft,rentInsNFT,payNextIns} = require('./scripts/installment_functions')
 
 const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
 const signer_m = new ethers.Wallet("7e0dd21cba3952c769b9a90376893a351d4ac356aeacd0e537f5022e08593528", provider); // Meelan Credentials
@@ -26,7 +27,7 @@ stand = "ERC4907"
 async function basic_handler(cond, signer){
 
     if (cond==1){ // Mint a new NFT name, description and the file location is required
-        response =  await mintNFT("Beauty Box 04","Beautiful lancer box 04","box4.jpg",signer,stand)
+        response =  await mintNFT("cute panda 2222","Beautiful panda","panda.jpg",signer,stand)
         console.log(response)
     }
     else if (cond==2){ // list a nft to be sold in the market place, token_ID and the price is required
@@ -102,12 +103,45 @@ async function rent_handler(cond, signer){
     }
 }
 
-basic_handler(2,signer_i)
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error)
-        process.exit(1)
-    })
+async function ins_handler(cond, signer){
+
+    if (cond==1){ // list a new NFT name, description and the file location is required
+        token_ID = 12
+        price = 0.04
+        response =  await ListInsNFT(token_ID,price,signer,stand)
+        console.log(response)
+    }
+    else if (cond==2){ // view the price and the listing of a NFT, token_ID is required as the input
+        token_ID = 12
+        response = await ViewAInsListing(token_ID,provider,stand) //Data can be read only with the provider
+        console.log(response)
+    }
+    else if (cond==3){ //  get the next installment
+        token_ID = 12
+        rentalDays = 5
+        response = await view_installment(token_ID,provider,stand,rentalDays) //Data can be read only with the provider
+    }
+    else if (cond==4){ // unlist a nft
+        token_ID = 12
+        response = await unlist_nft(token_ID,signer,stand) //Data can be read only with the provider
+    }
+    else if (cond==5){ // pulls available proceeds
+        token_ID = 12
+        num_days = 5
+        response = await rentInsNFT(token_ID,signer,stand,num_days) //Data can be read only with the provider
+    }
+    else if (cond==6){ // pulls available proceeds
+        token_ID = 12
+        response = await payNextIns(token_ID,signer,stand) //Data can be read only with the provider
+    }
+}
+
+// basic_handler(1,signer_m)
+//     .then(() => process.exit(0))
+//     .catch((error) => {
+//         console.error(error)
+//         process.exit(1)
+//     })
 
 // rent_handler(2,signer_i)
 //     .then(() => process.exit(0))
@@ -115,4 +149,11 @@ basic_handler(2,signer_i)
 //         console.error(error)
 //         process.exit(1)
 //     })
+
+ins_handler(5,signer_r)
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error)
+        process.exit(1)
+    })
 

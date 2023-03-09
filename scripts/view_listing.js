@@ -1,8 +1,10 @@
 const { ethers } = require("hardhat")
 const { amplace_token } = require('../config')
+const { insmplace_token } = require('../config')
 const {get_standard} = require('../services/token_standard')
 const fs = require('fs');
 const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianMarkett.sol/AvianMarkett.json', 'utf-8'))
+const InsMarketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianInstallment.sol/AvianInstallment.json', 'utf-8'))
 
 
 async function ViewASellListing(tokenId, signer, std) {
