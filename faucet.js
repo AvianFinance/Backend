@@ -16,6 +16,7 @@ const { UpdateListing } = require('./scripts/update_listed_nft')
 const { buyNFT } = require('./scripts/buy_nft')
 const { pullProceeds } = require('./scripts/get_proceeds')
 const { rentNFT } = require('./scripts/rent_nft')
+const {view_installment,unlist_nft,rentInsNFT,payNextIns} = require('./scripts/installment_functions')
 
 const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
 const signer_m = new ethers.Wallet("7e0dd21cba3952c769b9a90376893a351d4ac356aeacd0e537f5022e08593528", provider); // Meelan Credentials
@@ -121,21 +122,23 @@ async function ins_handler(cond, signer){
         response = await ViewAInsListing(token_ID,provider,stand) //Data can be read only with the provider
         console.log(response)
     }
-    else if (cond==3){ // rent the nft
-        token_ID = 22
-        n_days = 2
-        // expires = Math.floor(Date.now()/1000) + (n_days*24*60*60)
-        price = 0.05
-        response = await rentNFT(token_ID,signer,stand,n_days,price) //Data can be read only with the provider
-        console.log(response)
+    else if (cond==3){ //  get the next installment
+        token_ID = 32
+        rentalDays = 5
+        response = await view_installment(token_ID,provider,stand,rentalDays) //Data can be read only with the provider
     }
-    else if (cond==4){ // pulls available proceeds
-        response = await ViewRentListedAddrs(provider) //Data can be read only with the provider
-        console.log(response)
+    else if (cond==4){ // unlist a nft
+        token_ID = 32
+        response = await unlist_nft(token_ID,signer,stand) //Data can be read only with the provider
     }
     else if (cond==5){ // pulls available proceeds
-        response = await ViewRentListedAddrTokens(stand,provider) //Data can be read only with the provider
-        console.log(response)
+        token_ID = 32
+        num_days = 5
+        response = await rentInsNFT(token_ID,signer,stand,num_days) //Data can be read only with the provider
+    }
+    else if (cond==6){ // pulls available proceeds
+        token_ID = 32
+        response = await payNextIns(token_ID,signer,stand) //Data can be read only with the provider
     }
 }
 
@@ -153,7 +156,7 @@ async function ins_handler(cond, signer){
 //         process.exit(1)
 //     })
 
-ins_handler(2,signer_m)
+ins_handler(2,signer_r)
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error)

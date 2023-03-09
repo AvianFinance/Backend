@@ -345,9 +345,9 @@ contract AvianInstallment is ReentrancyGuard {
         uint256 unit_price = rentalFee/sum;
 
         if (installment_index<installment_count){
-            installment_amount = unit_price*installment_index;
+            installment_amount = unit_price*(installment_count - installment_index +1);
         } else if (installment_index==installment_count){
-            installment_amount = rentalFee - (unit_price*(installment_index-1));
+            installment_amount = rentalFee - (unit_price*(sum-1));
         }
 
         return installment_amount;
@@ -355,7 +355,8 @@ contract AvianInstallment is ReentrancyGuard {
 
     function getNFTInstallment(
         address nftAddress,
-        uint256 tokenId
+        uint256 tokenId,
+        uint64 rentalDays
     ) public view 
         returns (uint256) 
     {
@@ -364,7 +365,7 @@ contract AvianInstallment is ReentrancyGuard {
         uint64 currIndex = listing.installment_index;
         uint64 nextIndex = currIndex + 1;
     
-        uint256 rentalFee = listing.pricePerDay*listing.numDays;
+        uint256 rentalFee = listing.pricePerDay*rentalDays;
         
         uint256 insFee = calculateInstallment(listing.installment_count,rentalFee,nextIndex);
 
@@ -408,7 +409,5 @@ contract AvianInstallment is ReentrancyGuard {
             insFee
         );
     }
-
-
 
 }
