@@ -87,21 +87,6 @@ async function ViewRentListedAddrTokens(std,provider) {
     return("Listing data: ", tx)
 }
 
-//////////////// Ins based
-
-async function ViewAInsListing(tokenId, signer, std) {
-
-    const standard = await get_standard(std)
-    const token_address = standard.addr;
-
-    const mplace_contract = new ethers.Contract(insmplace_token, InsMarketplace.abi, signer)
-
-    console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getAINSListing(token_address, tokenId)
-
-    return("Listing data: ", tx)
-}
-
 
 module.exports = {
     ViewASellListing,
@@ -111,5 +96,4 @@ module.exports = {
     ViewRentListedAddrs,
     ViewSellListedAddrTokens,
     ViewRentListedAddrTokens,
-    ViewAInsListing,
 };

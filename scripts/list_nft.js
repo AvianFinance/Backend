@@ -66,38 +66,6 @@ async function ListRentNFT(tokenId,amount,signer,std, sDate, eDate) {
         `NFT with ID ${tokenId} listed by owner ${mintedBy}.`)
 }
 
-
-async function ListInsNFT(tokenId,amount,signer,std, sDate, eDate, insCount) {
-
-    const standard = await get_standard(std)
-
-    const token_address = standard.addr;
-    const nft_token = standard.token;
-
-    const PRICE = ethers.utils.parseEther(amount.toString())
-
-    const mplace_contract = new ethers.Contract(insmplace_token, InsMarketplace.abi, signer)
-    const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
-
-    console.log("Approving Marketplace as operator of NFT...")
-    const approvalTx = await token_contract.approve(mplace_contract.address, tokenId)
-    await approvalTx.wait(1)
-
-    const mintedBy = await token_contract.ownerOf(tokenId)
-    const listingFee = (await mplace_contract.getListingFee()).toString();
-
-    console.log("Listing NFT...")
-    const tx = await mplace_contract.listInsBasedNFT(token_contract.address, tokenId, PRICE, sDate, eDate, insCount, {
-        value: listingFee,
-    })
-
-    await tx.wait(1)
-    console.log("NFT Listed with token ID: ", tokenId.toString())
-
-    return(
-        `NFT with ID ${tokenId} listed by owner ${mintedBy}.`)
-}
-
 // buyItem()
 //     .then(() => process.exit(0))
 //     .catch((error) => {
@@ -109,6 +77,5 @@ async function ListInsNFT(tokenId,amount,signer,std, sDate, eDate, insCount) {
 
 module.exports = {
     ListNFT,
-    ListRentNFT,
-    ListInsNFT
+    ListRentNFT
 };
