@@ -106,32 +106,32 @@ async function rent_handler(cond, signer){
 async function ins_handler(cond, signer){
 
     if (cond==1){ // list a new NFT name, description and the file location is required
-        token_ID = 0
-        price = 0.03
+        token_ID = 12
+        price = 0.04
         response =  await ListInsNFT(token_ID,price,signer,stand)
         console.log(response)
     }
     else if (cond==2){ // view the price and the listing of a NFT, token_ID is required as the input
-        token_ID = 0
+        token_ID = 12
         response = await ViewAInsListing(token_ID,provider,stand) //Data can be read only with the provider
         console.log(response)
     }
     else if (cond==3){ //  get the next installment
-        token_ID = 0
+        token_ID = 12
         rentalDays = 5
         response = await view_installment(token_ID,provider,stand,rentalDays) //Data can be read only with the provider
     }
     else if (cond==4){ // unlist a nft
-        token_ID = 0
+        token_ID = 12
         response = await unlist_nft(token_ID,signer,stand) //Data can be read only with the provider
     }
     else if (cond==5){ // pulls available proceeds
-        token_ID = 0
+        token_ID = 12
         num_days = 5
         response = await rentInsNFT(token_ID,signer,stand,num_days) //Data can be read only with the provider
     }
     else if (cond==6){ // pulls available proceeds
-        token_ID = 0
+        token_ID = 12
         response = await payNextIns(token_ID,signer,stand) //Data can be read only with the provider
     }
 }
@@ -150,7 +150,7 @@ async function ins_handler(cond, signer){
 //         process.exit(1)
 //     })
 
-ins_handler(2,signer_r)
+ins_handler(5,signer_r)
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error)

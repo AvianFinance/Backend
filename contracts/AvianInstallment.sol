@@ -269,10 +269,8 @@ contract AvianInstallment is ReentrancyGuard {
         require(listing.user == address(0) || block.timestamp > listing.expires, "NFT already rented");
 
         uint64 expires = uint64(block.timestamp) + 86400;
-        uint64 currIndex = listing.installmentIndex;
-        uint64 nextIndex = currIndex + 1;
         
-        uint256 firstIns = calculateInstallment(listing.paidIns,numDays,listing.pricePerDay,nextIndex);
+        uint256 firstIns = calculateInstallment(0,numDays,listing.pricePerDay,1);
 
         require(msg.value >= firstIns, "Not enough ether to cover rental period");
         payable(listing.owner).transfer(firstIns);
@@ -282,7 +280,7 @@ contract AvianInstallment is ReentrancyGuard {
         listing.user = msg.sender;
         listing.expires = expires;
         listing.installmentCount = numDays;
-        listing.installmentIndex = nextIndex;
+        listing.installmentIndex = 1;
         listing.paidIns = firstIns;
 
         emit NFTINSPaid(
@@ -291,7 +289,7 @@ contract AvianInstallment is ReentrancyGuard {
             nftContract,
             tokenId,
             expires,
-            currIndex,
+            1,
             firstIns,
             firstIns
         );
@@ -303,7 +301,7 @@ contract AvianInstallment is ReentrancyGuard {
         uint256 installmentCount,
         uint256 pricePerDay,
         uint installmentIndex
-    ) public pure
+    ) private pure
         returns (uint256) 
     {
         require(installmentIndex <= installmentCount, "Installment Index should be lesser than the installment count");
@@ -342,10 +340,15 @@ contract AvianInstallment is ReentrancyGuard {
             installmentCount = listing.installmentCount;
         }
 
-        uint64 currIndex = listing.installmentIndex;
-        uint64 nextIndex = currIndex + 1;
-        
-        uint256 nextIns = calculateInstallment(listing.paidIns,installmentCount,listing.pricePerDay,nextIndex);
+        uint256 nextIns = 0;
+
+        if (listing.installmentCount==listing.installmentIndex){
+            nextIns = calculateInstallment(0,installmentCount,listing.pricePerDay,1);
+        }else {
+            uint64 currIndex = listing.installmentIndex;
+            uint64 nextIndex = currIndex + 1;
+            nextIns = calculateInstallment(listing.paidIns,installmentCount,listing.pricePerDay,nextIndex);
+        }
 
         return nextIns;
     }
@@ -360,6 +363,8 @@ contract AvianInstallment is ReentrancyGuard {
         Listing_installment storage listing = i_listings[nftContract][tokenId];
 
         require(listing.user == msg.sender, "You are not the current renter");
+        require(listing.installmentIndex < listing.installmentCount, "Rental fee is fully paid");
+        require(listing.installmentIndex >= 1, "Rental agreement not yet made");
         require(block.timestamp < listing.expires, "NFT expired");
 
         uint64 expires = listing.expires + 86400;
@@ -377,13 +382,9 @@ contract AvianInstallment is ReentrancyGuard {
 
         uint256 totalPaid = listing.paidIns + nextIns;
 
-        if (nextIndex==listing.installmentCount){
-            listing.installmentIndex = 0;
-            listing.paidIns = 0;
-        }else{
-            listing.installmentIndex = nextIndex;
-            listing.paidIns = totalPaid;
-        }
+        listing.installmentIndex = nextIndex;
+        listing.paidIns = totalPaid;
+
 
         emit NFTINSPaid(
             IERC721(nftContract).ownerOf(tokenId),
@@ -396,7 +397,4 @@ contract AvianInstallment is ReentrancyGuard {
             totalPaid
         );
     }
-
-
-
 }
