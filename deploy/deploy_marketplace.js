@@ -1,26 +1,38 @@
-
 const hre = require("hardhat");
 const fs = require('fs');
 
 async function main() {  //Create the address for the RimeToken collection
-  const MarketPlace = await hre.ethers.getContractFactory("Marketplace");
-  const mplace_token = await MarketPlace.deploy();
+    const SExchange = await hre.ethers.getContractFactory("AvianSellExchange");
+    const RExchange = await hre.ethers.getContractFactory("AvianRentExchange");
+    const IExchange = await hre.ethers.getContractFactory("AvianInsExchange");
 
-  await mplace_token.deployed();
+    const sexchange_token = await SExchange.deploy();
+    await sexchange_token.deployed();
 
-  console.log("MarketPlace deployed to:", mplace_token.address);
-  fs.writeFileSync('./config.js', `
-  mplace_token = "${mplace_token.address}"
-  
-  module.exports = {
-      mplace_token,
-  };
-  `)
+    const rexchange_token = await RExchange.deploy();
+    await rexchange_token.deployed();
+
+    const iexchange_token = await IExchange.deploy();
+    await iexchange_token.deployed();
+
+    console.log("MarketPlace deployed successfully !");
+
+    fs.writeFileSync('./config.js', `
+    sexchange_token = "${sexchange_token.address}"
+    rexchange_token = "${rexchange_token.address}"
+    iexchange_token = "${iexchange_token.address}"
+
+    module.exports = {
+        sexchange_token,
+        rexchange_token,
+        iexchange_token,
+    };
+    `)
 }
 
 main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
+    });
