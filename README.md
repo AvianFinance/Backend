@@ -32,5 +32,4 @@ In case you require to deploy your own version of the smart contract:
 
 > Step 04 : Deploy the contract to fuji testnet via,
 
-            npx hardhat run scripts/deploy_RimeToken.js --network avalanche_fuji
-
+            npx hardhat run deploy/deploy_RimeToken.js 
