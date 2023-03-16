@@ -1,12 +1,10 @@
 const { ethers } = require("hardhat")
 const { mintNFT } = require('./scripts/mint_nft')
-const { ViewASellListing,ViewRentListing,ViewSellListing,ViewSellListedAddrs,ViewSellListedAddrTokens,ViewRentListedAddrs,ViewRentListedAddrTokens } = require('./scripts/view_listing')
-const { ListNFT,ListRentNFT } = require('./scripts/list_nft')
-const { UpdateListing } = require('./scripts/update_listed_nft')
-const { buyNFT } = require('./scripts/buy_nft')
 const { pullProceeds } = require('./scripts/get_proceeds')
-const { rentNFT } = require('./scripts/rent_nft')
-const {ListInsNFT,ViewAInsListing,view_installment,unlist_nft,rentInsNFT,payNextIns} = require('./scripts/installment_functions')
+
+const { ListRentNFT, ViewRentListing, ViewRentListedAddrs, ViewRentListedAddrTokens, rentNFT} = require('./scripts/rexchange_functions')
+const { ListNFT, UpdateListing, ViewASellListing, ViewSellListing, ViewSellListedAddrs, ViewSellListedAddrTokens, buyNFT} = require('./scripts/sexchange_functions')
+const { ListInsNFT,ViewAInsListing,view_installment,unlist_nft,rentInsNFT,payNextIns} = require('./scripts/iexchange_functions')
 
 const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
 const signer_m = new ethers.Wallet("7e0dd21cba3952c769b9a90376893a351d4ac356aeacd0e537f5022e08593528", provider); // Meelan Credentials
@@ -15,7 +13,7 @@ const signer_i = new ethers.Wallet("986815db062b75efa84cd38ea93e08e9e13a42ee9493
 
 stand = "ERC4907" // token type : set correctly before initiating
 
-async function basic_handler(cond, signer){ // For handling buy sell related scenarios
+async function sexchange_handler(cond, signer){ // For handling buy sell related scenarios
 
     if (cond==1){ // Mint a new NFT name
         response =  await mintNFT("cute panda 2222","Beautiful panda","panda.jpg",signer,stand)
@@ -61,15 +59,12 @@ async function basic_handler(cond, signer){ // For handling buy sell related sce
     }
 }
 
-async function rent_handler(cond, signer){ // For handling outright rental related scenarios
+async function rexchange_handler(cond, signer){ // For handling outright rental related scenarios
 
     if (cond==1){ // list a new NFT for rentals
         token_ID = 3
         price = 0.08
-        n_days = 30
-        sDate = Math.floor(Date.now()/1000) + (60*60);
-        eDate = sDate + (n_days*24*60*60);
-        response =  await ListRentNFT(token_ID,price,signer,stand,sDate,eDate)
+        response =  await ListRentNFT(token_ID,price,signer,stand)
         console.log(response)
     }
     else if (cond==2){ // view the price and the listing of a NFT
@@ -93,7 +88,7 @@ async function rent_handler(cond, signer){ // For handling outright rental relat
     }
 }
 
-async function ins_handler(cond, signer){ // For handling installment based rental related scenarios
+async function iexchange_handler(cond, signer){ // For handling installment based rental related scenarios
 
     if (cond==1){ // list a new NFT name
         token_ID = 12
@@ -126,21 +121,21 @@ async function ins_handler(cond, signer){ // For handling installment based rent
     }
 }
 
-// basic_handler(1,signer_m)
+// sexchange_handler(1,signer_m)
 //     .then(() => process.exit(0))
 //     .catch((error) => {
 //         console.error(error)
 //         process.exit(1)
 //     })
 
-// rent_handler(2,signer_i)
+// rexchange_handler(2,signer_i)
 //     .then(() => process.exit(0))
 //     .catch((error) => {
 //         console.error(error)
 //         process.exit(1)
 //     })
 
-// ins_handler(5,signer_r)
+// iexchange_handler(5,signer_r)
 //     .then(() => process.exit(0))
 //     .catch((error) => {
 //         console.error(error)
