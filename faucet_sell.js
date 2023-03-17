@@ -17,24 +17,24 @@ async function sexchange_handler(cond, signer){ // For handling buy sell related
         console.log(response)
     }
     else if (cond==2){ // list a nft to be sold in the market place
-        token_ID = 2
-        price = 0.06
+        token_ID = 32
+        price = 0.08
         response = await ListNFT(token_ID,price,signer,stand)
         console.log(response)
     }
     else if (cond==3){ // view the price and the listing of a NFT
-        token_ID = 2
+        token_ID = 4
         response = await ViewASellListing(token_ID,provider,stand)
         console.log(response)
     }
     else if (cond==4){ // update the price of a NFT
-        token_ID = 2
-        price = 0.05
+        token_ID = 4
+        price = 0.06
         response = await UpdateListing(token_ID,price,signer,stand) 
         console.log(response)
     }
     else if (cond==5){ // buy a listed nft
-        token_ID = 2
+        token_ID = 4
         response = await buyNFT(token_ID,signer,stand) 
         console.log(response)
     }
@@ -57,7 +57,7 @@ async function sexchange_handler(cond, signer){ // For handling buy sell related
 }
 
 
-sexchange_handler(9,signer_r)
+sexchange_handler(6,signer_m)
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error)

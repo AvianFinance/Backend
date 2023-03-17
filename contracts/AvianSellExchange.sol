@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
@@ -23,10 +22,6 @@ contract AvianSellExchange is ReentrancyGuard {
     using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
-    
-    
-    address private _marketOwner;
-    uint256 private _listingFee = .01 ether;
 
     struct Listing_sell {
         address owner;
@@ -55,20 +50,7 @@ contract AvianSellExchange is ReentrancyGuard {
         uint256 price
     );
 
-
-    // mapping for basics
-
-    mapping(address => mapping(uint256 => Listing_sell)) private s_listings;   // Holds the erc 721 for basic listings
- 
-    mapping(address => uint256) private s_proceeds;
-    
-    mapping(address => EnumerableSet.UintSet) private s_address_tokens; // maps buy sell nft contracts to set of the tokens that are listed
-
-    EnumerableSet.AddressSet private s_address; // tracks the rent nft contracts that have been listed
-
-    Counters.Counter private s_listed;
-
-    modifier notSListed( // Modifier to check whether a given erc721 token is not listed or not
+    modifier notSListed( 
         address nftAddress,
         uint256 tokenId
     ) {
@@ -102,6 +84,23 @@ contract AvianSellExchange is ReentrancyGuard {
         _;
     }
 
+
+    // mapping for basics
+
+    address private _marketOwner;
+
+    uint256 private _listingFee = .01 ether;
+
+    mapping(address => mapping(uint256 => Listing_sell)) private s_listings;   // Holds the erc 721 for basic listings
+ 
+    mapping(address => uint256) private s_proceeds;
+    
+    mapping(address => EnumerableSet.UintSet) private s_address_tokens; // maps buy sell nft contracts to set of the tokens that are listed
+
+    EnumerableSet.AddressSet private s_address; // tracks the rent nft contracts that have been listed
+
+    Counters.Counter private s_listed;
+
     constructor() {
         _marketOwner = msg.sender;
     }
@@ -114,7 +113,7 @@ contract AvianSellExchange is ReentrancyGuard {
         uint256 price
     ) external
         notSListed(nftAddress, tokenId)
-    {
+    returns(string memory){
         require(isNFT(nftAddress), "Contract is not an ERC721");
         require(IERC721(nftAddress).ownerOf(tokenId) == msg.sender, "Not owner of nft");
         require(price > 0, "listing price should be greater than 0");
@@ -131,6 +130,8 @@ contract AvianSellExchange is ReentrancyGuard {
         EnumerableSet.add(s_address, nftAddress);
 
         emit ItemListed(msg.sender, nftAddress, tokenId, price);
+
+        return("NFT Listed successfully for upright selling");
     }
 
 
@@ -164,7 +165,7 @@ contract AvianSellExchange is ReentrancyGuard {
     ) external payable
         isSListed(nftAddress, tokenId)
         nonReentrant
-    {
+    returns(string memory){
         Listing_sell memory listedItem = s_listings[nftAddress][tokenId];
         if (msg.value < listedItem.price) {
             revert PriceNotMet(nftAddress, tokenId, listedItem.price);
@@ -182,6 +183,7 @@ contract AvianSellExchange is ReentrancyGuard {
 
         IERC721(nftAddress).safeTransferFrom(listedItem.owner, msg.sender, tokenId);
         emit ItemBought(msg.sender, nftAddress, tokenId, listedItem.price);
+        return("NFT successfully Bought");
     }
 
     // Update already listed listings
@@ -194,21 +196,19 @@ contract AvianSellExchange is ReentrancyGuard {
         isSListed(nftAddress, tokenId)
         nonReentrant
         isOwner(nftAddress, tokenId, msg.sender)
-    {
+    returns(string memory){
         require(newPrice > 0, "listing price should be greater than 0");
 
         s_listings[nftAddress][tokenId].price = newPrice;
 
         emit ItemListed(msg.sender, nftAddress, tokenId, newPrice);
+
+        return("Successfully updated the listing");
     }
 
     // Withdraw Proceeds in the pull pattern. Used when multiple transactions are made within a single function
 
-    function withdrawProceeds(
-
-    ) external
-    
-    {
+    function withdrawProceeds() external returns(string memory){
         uint256 proceeds = s_proceeds[msg.sender];
         if (proceeds <= 0) {
             revert NoProceeds();
@@ -216,6 +216,8 @@ contract AvianSellExchange is ReentrancyGuard {
         s_proceeds[msg.sender] = 0;
         (bool success, ) = payable(msg.sender).call{value: proceeds}("");
         require(success, "Transfer failed");
+
+        return("Successfully transferred the proceeds");
     }
 
     // Getter Functions

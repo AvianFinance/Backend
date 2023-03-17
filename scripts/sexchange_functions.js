@@ -3,7 +3,7 @@ const { sexchange_token } = require('../config')
 const fs = require('fs');
 const {get_standard} = require('../services/token_standard')
 
-const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianSellExchange.sol/AvianSellExchange.json', 'utf-8'))
+const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/ASEProxy.sol/ASE_Proxy.json', 'utf-8'))
 
 async function ListNFT(tokenId,amount,signer,std) {
 
