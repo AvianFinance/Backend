@@ -19,7 +19,7 @@ error NotApprovedForMarketplace();
 error PriceMustBeAboveZero();
 
 
-contract AvianRentExchange is ReentrancyGuard {
+contract ARE_Proxy is ReentrancyGuard {
 
     using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -31,10 +31,8 @@ contract AvianRentExchange is ReentrancyGuard {
         address nftContract;
         uint256 tokenId;
         uint256 pricePerDay;
-        uint256 expires; // when the user can no longer rent it
+        uint256 expires; 
     }
-
-    // events for nft rentals
 
     event NFTListed(
         address indexed owner,
@@ -58,7 +56,12 @@ contract AvianRentExchange is ReentrancyGuard {
         uint256 indexed tokenId
     );
 
-    modifier notRListed( // Modifier to check whether a given erc4907 token is not listed or not
+    event ImplUpgrade(
+        address indexed marketowner,
+        address indexed newImplAddrs
+    );
+
+    modifier notRListed( 
         address nftAddress,
         uint256 tokenId
     ) {
@@ -90,7 +93,7 @@ contract AvianRentExchange is ReentrancyGuard {
         _;
     }
 
-    // mapping for basics
+    // State Variables for the proxy
 
     address private _marketOwner;
 
@@ -106,8 +109,11 @@ contract AvianRentExchange is ReentrancyGuard {
 
     Counters.Counter private r_listed;
 
-    constructor() {
+    address private impl_rent;
+
+    constructor(address _implContract) {
         _marketOwner = msg.sender;
+        impl_rent = _implContract;
     }
 
     // Listing Functionality
@@ -116,110 +122,33 @@ contract AvianRentExchange is ReentrancyGuard {
         address nftAddress,
         uint256 tokenId,
         uint256 pricePerDay
-    ) public payable 
-        nonReentrant 
-        notRListed(nftAddress, tokenId)
-    returns (string memory) {
-        require(isRentableNFT(nftAddress), "Contract is not an ERC4907");
-        require(IERC721(nftAddress).ownerOf(tokenId) == msg.sender, "Not owner of nft");
-        require(msg.value == _listingFee, "Not enough ether for listing fee");
-        require(pricePerDay > 0, "Rental price should be greater than 0");
-
-        IERC721 nft = IERC721(nftAddress);
-        if (nft.getApproved(tokenId) != address(this)) {
-            revert NotApprovedForMarketplace();
-        }
-
-        payable(_marketOwner).transfer(_listingFee);
-
-        r_listings[nftAddress][tokenId] = Listing_rent(
-            msg.sender,
-            address(0),
-            nftAddress,
-            tokenId,
-            pricePerDay,
-            0
-        );
-
-        r_listed.increment();
-        EnumerableSet.add(r_address_tokens[nftAddress], tokenId);
-        EnumerableSet.add(r_address, nftAddress);
-        
-        emit NFTListed(
-            IERC721(nftAddress).ownerOf(tokenId),
-            address(0),
-            nftAddress,
-            tokenId,
-            pricePerDay,
-            0
-        );
-
-        return("NFT Successfully listed");
+    ) public payable returns(string memory) {
+        (bool success, bytes memory data) = impl_rent.delegatecall(abi.encodeWithSignature("listNFT(address,uint256,uint256)", nftAddress, tokenId, pricePerDay));
+        require(success, "transaction failed");
+        return(abi.decode(data, (string)));
     }
-
 
     // Unlisting functionality
 
-    function unlistNFT(                                 // for erc4907 listings
+    function unlistNFT(                        
         address nftAddress, 
         uint256 tokenId
-    ) public payable 
-        nonReentrant 
-        isOwner(nftAddress, tokenId, msg.sender)
-        isRListed(nftAddress, tokenId)
-    returns (string memory) { 
-        EnumerableSet.remove(r_address_tokens[nftAddress], tokenId);
-
-        delete r_listings[nftAddress][tokenId];
-
-        if (EnumerableSet.length(r_address_tokens[nftAddress]) == 0) {
-            EnumerableSet.remove(r_address, nftAddress);
-        }
-        r_listed.decrement();
-
-        emit NFTUnlisted(
-            msg.sender,
-            nftAddress,
-            tokenId
-        );
-
-        return("NFT Successfully unlisted");
+    ) public payable returns(string memory) { 
+        (bool success, bytes memory data) = impl_rent.delegatecall(abi.encodeWithSignature("unlistNFT(address,uint256)", nftAddress, tokenId));
+        require(success, "transaction failed");
+        return(abi.decode(data, (string)));
     }
 
     // start of the rental functions
 
     function rentNFT(
-        address nftContract,
+        address nftAddress,
         uint256 tokenId,
         uint64 numDays
-    ) public payable 
-        nonReentrant 
-    returns(string memory) {
-        require(numDays <= _maxInstallments, "Maximum of 10 rental days are allowed");
-        Listing_rent storage listing = r_listings[nftContract][tokenId];
-        require(listing.user == address(0) || block.timestamp > listing.expires, "NFT already rented");
-
-        uint64 expires = uint64(block.timestamp) + (numDays*86400);
-    
-        uint256 rentalFee = listing.pricePerDay * numDays;
-        require(msg.value >= rentalFee, "Not enough ether to cover rental period");
-        payable(listing.owner).transfer(rentalFee);
-
-        // Update listing
-        IERC4907(nftContract).setUser(tokenId, msg.sender, expires);
-        listing.user = msg.sender;
-        listing.expires = expires;
-
-        emit NFTRented(
-            IERC721(nftContract).ownerOf(tokenId),
-            msg.sender,
-            nftContract,
-            tokenId,
-            expires,
-            rentalFee
-        );
-
-        return("NFT successfully rented");
+    ) public payable returns(string memory) {
+        (bool success, bytes memory data) = impl_rent.delegatecall(abi.encodeWithSignature("rentNFT(address,uint256,uint64)", nftAddress, tokenId, numDays));
+        require(success, "transaction failed");
+        return(abi.decode(data, (string)));
     }
 
     function getARListing(        // Get a specific r_listing
@@ -274,7 +203,6 @@ contract AvianRentExchange is ReentrancyGuard {
         return tokens;
     }
 
-
     function isRentableNFT(address nftContract) public view returns (bool) {
         bool _isRentable = false;
         bool _isNFT = false;
@@ -300,5 +228,27 @@ contract AvianRentExchange is ReentrancyGuard {
             return false;
         }
         return _isNFT;
+    }
+
+        // Implementation upgrade logic
+
+    function updateImplContract(
+        address newImplAddrs
+    ) external
+        nonReentrant
+    {
+        require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
+        impl_rent = newImplAddrs;
+        emit ImplUpgrade(
+            _marketOwner,
+            impl_rent
+        );
+    }
+
+    function getImplAddrs(
+    ) public view 
+        returns (address) 
+    {
+        return impl_rent;
     }
 }

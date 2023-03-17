@@ -3,7 +3,7 @@ const { rexchange_token } = require('../config')
 const fs = require('fs');
 const {get_standard} = require('../services/token_standard')
 
-const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianRentExchange.sol/AvianRentExchange.json', 'utf-8'))
+const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AREProxy.sol/ARE_Proxy.json', 'utf-8'))
 
 async function ListRentNFT(tokenId,amount,signer,std) {
 
