@@ -3,7 +3,7 @@ const { iexchange_token } = require('../config')
 const fs = require('fs');
 const {get_standard} = require('../services/token_standard')
 
-const InsMarketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianInsExchange.sol/AvianInsExchange.json', 'utf-8'))
+const InsMarketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AIEProxy.sol/AIE_Proxy.json', 'utf-8'))
 
 async function ListInsNFT(tokenId,pricePerDay,signer,std) {
 

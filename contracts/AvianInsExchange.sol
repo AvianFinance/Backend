@@ -24,12 +24,6 @@ contract AvianInsExchange is ReentrancyGuard {
     using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
-    
-    
-    address private _marketOwner;
-    uint256 private _listingFee = .01 ether;
-    uint64 private _maxInstallments = 10;
-
 
     struct Listing_installment { 
         address owner;
@@ -69,17 +63,6 @@ contract AvianInsExchange is ReentrancyGuard {
         uint256 indexed tokenId
     );
 
-    // mapping for basics
-
-    mapping(address => mapping(uint256 => Listing_installment)) private i_listings;   // Holds the erc 4907 for installment based rentings
-
-    mapping(address => EnumerableSet.UintSet) private i_address_tokens; // maps installment based rent nft contracts to set of the tokens that are listed
-
-    EnumerableSet.AddressSet private i_address; // tracks the ins basede rent nft contracts that have been listed
-
-    Counters.Counter private i_listed;
-
-
     modifier notIListed( // Modifier to check whether a given erc4907 token is not listed or not for installment based
         address nftAddress,
         uint256 tokenId
@@ -112,6 +95,22 @@ contract AvianInsExchange is ReentrancyGuard {
         _;
     }
 
+    // State Variables for the installment implementation
+
+    address private _marketOwner;
+
+    uint256 private _listingFee = .01 ether;
+
+    uint64 private _maxInstallments = 10;
+
+    mapping(address => mapping(uint256 => Listing_installment)) private i_listings;   // Holds the erc 4907 for installment based rentings
+
+    mapping(address => EnumerableSet.UintSet) private i_address_tokens; // maps installment based rent nft contracts to set of the tokens that are listed
+
+    EnumerableSet.AddressSet private i_address; // tracks the ins basede rent nft contracts that have been listed
+
+    Counters.Counter private i_listed;
+
     constructor() {
         _marketOwner = msg.sender;
     }
@@ -123,7 +122,7 @@ contract AvianInsExchange is ReentrancyGuard {
     ) public payable 
         nonReentrant 
         notIListed(nftAddress, tokenId)
-    {
+    returns(string memory) {
         require(isRentableNFT(nftAddress), "Contract is not an ERC4907");
         require(IERC721(nftAddress).ownerOf(tokenId) == msg.sender, "Not owner of nft");
         require(msg.value == _listingFee, "Not enough ether for listing fee");
@@ -159,6 +158,8 @@ contract AvianInsExchange is ReentrancyGuard {
             tokenId,
             pricePerDay
         );
+
+        return("Successfully listed the NFT for installment based rentals");
     }
 
 
@@ -170,7 +171,7 @@ contract AvianInsExchange is ReentrancyGuard {
     ) public
         isOwner(nftAddress, tokenId, msg.sender)
         isIListed(nftAddress, tokenId)
-    { 
+    returns(string memory){ 
         EnumerableSet.remove(i_address_tokens[nftAddress], tokenId);
 
         delete i_listings[nftAddress][tokenId];
@@ -185,6 +186,8 @@ contract AvianInsExchange is ReentrancyGuard {
             nftAddress,
             tokenId
         );
+
+        return("Successfully removed the listing");
     }
 
 
@@ -260,7 +263,7 @@ contract AvianInsExchange is ReentrancyGuard {
         uint64 numDays
     ) public payable 
         nonReentrant 
-    {
+    returns(string memory){
         require(numDays <= _maxInstallments, "Maximum of 10 rental days are allowed");
         require(numDays > 1, "Number of installments must be greater than 1");
 
@@ -293,6 +296,8 @@ contract AvianInsExchange is ReentrancyGuard {
             firstIns,
             firstIns
         );
+
+        return("Successfully rented the nft by paying the first installment");
     }
 
 
@@ -300,8 +305,8 @@ contract AvianInsExchange is ReentrancyGuard {
         uint256 totalPaid,
         uint256 installmentCount,
         uint256 pricePerDay,
-        uint installmentIndex
-    ) private pure
+        uint64 installmentIndex
+    ) public pure
         returns (uint256) 
     {
         require(installmentIndex <= installmentCount, "Installment Index should be lesser than the installment count");
@@ -326,32 +331,27 @@ contract AvianInsExchange is ReentrancyGuard {
         return installment_amount;
     }
 
-    function getNftInstallment(
-        address nftAddress,
-        uint256 tokenId,
-        uint64 installmentCount
-    ) public view 
-        returns (uint256) 
-    {
+    // function getNftInstallment(
+    //     Listing_installment memory listing,
+    //     uint256 pricePerDay,
+    //     uint256 totalPaid,
+    //     uint installmentIndex,
+    //     uint64 installmentCount
+    // ) public pure 
+    //     returns (uint256) 
+    // {
+    //     uint256 nextIns = 0;
 
-        Listing_installment storage listing = i_listings[nftAddress][tokenId];
+    //     if (listing.installmentCount==0){
+    //         nextIns = calculateInstallment(0,installmentCount,pricePerDay,1);
+    //     }else {
+    //         uint64 currIndex = listing.installmentIndex;
+    //         uint64 nextIndex = currIndex + 1;
+    //         nextIns = calculateInstallment(totalPaid,listing.installmentCount,pricePerDay,nextIndex);
+    //     }
 
-        if (listing.installmentCount>0){
-            installmentCount = listing.installmentCount;
-        }
-
-        uint256 nextIns = 0;
-
-        if (listing.installmentCount==listing.installmentIndex){
-            nextIns = calculateInstallment(0,installmentCount,listing.pricePerDay,1);
-        }else {
-            uint64 currIndex = listing.installmentIndex;
-            uint64 nextIndex = currIndex + 1;
-            nextIns = calculateInstallment(listing.paidIns,installmentCount,listing.pricePerDay,nextIndex);
-        }
-
-        return nextIns;
-    }
+    //     return nextIns;
+    // }
 
 
     function payNFTIns(
@@ -359,7 +359,7 @@ contract AvianInsExchange is ReentrancyGuard {
         uint256 tokenId
     ) public payable 
         nonReentrant 
-    {
+    returns(string memory){
         Listing_installment storage listing = i_listings[nftContract][tokenId];
 
         require(listing.user == msg.sender, "You are not the current renter");
@@ -396,5 +396,7 @@ contract AvianInsExchange is ReentrancyGuard {
             nextIns,
             totalPaid
         );
+
+        return("Successfully paid the installment");
     }
 }
