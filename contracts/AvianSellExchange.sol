@@ -166,6 +166,12 @@ contract AvianSellExchange is ReentrancyGuard {
         isSListed(nftAddress, tokenId)
         nonReentrant
     returns(string memory){
+
+        IERC721 nft = IERC721(nftAddress);
+        if (nft.getApproved(tokenId) != address(this)) {
+            revert NotApprovedForMarketplace();
+        }
+
         Listing_sell memory listedItem = s_listings[nftAddress][tokenId];
         if (msg.value < listedItem.price) {
             revert PriceNotMet(nftAddress, tokenId, listedItem.price);

@@ -210,6 +210,11 @@ contract AvianInsExchange is ReentrancyGuard {
 
         require(listing.user == address(0) || block.timestamp > listing.expires, "NFT already rented");
 
+        IERC721 nft = IERC721(nftContract);
+        if (nft.getApproved(tokenId) != address(this)) {
+            revert NotApprovedForMarketplace();
+        }
+
         uint64 expires = uint64(block.timestamp) + 86400;
         
         uint256 firstIns = calculateInstallment(0,numDays,listing.pricePerDay,1);
@@ -255,11 +260,8 @@ contract AvianInsExchange is ReentrancyGuard {
         uint256 rentalFee = pricePerDay*installmentCount;
 
         uint256 installment_amount;
-        uint sum = 0;
+        uint sum = (installmentCount*(installmentCount+1))/2;
 
-        for (uint i = 1; i <= installmentCount; i++) {
-            sum = sum + i;
-        }
         uint256 unit_price = rentalFee/sum;
 
         if (installmentIndex<installmentCount){
@@ -285,6 +287,11 @@ contract AvianInsExchange is ReentrancyGuard {
         require(listing.installmentIndex < listing.installmentCount, "Rental fee is fully paid");
         require(listing.installmentIndex >= 1, "Rental agreement not yet made");
         require(block.timestamp < listing.expires, "NFT expired");
+
+        IERC721 nft = IERC721(nftContract);
+        if (nft.getApproved(tokenId) != address(this)) {
+            revert NotApprovedForMarketplace();
+        }
 
         uint64 expires = listing.expires + 86400;
         uint64 currIndex = listing.installmentIndex;
