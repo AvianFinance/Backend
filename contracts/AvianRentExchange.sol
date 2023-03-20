@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
@@ -31,7 +30,7 @@ contract AvianRentExchange is ReentrancyGuard {
         address nftContract;
         uint256 tokenId;
         uint256 pricePerDay;
-        uint256 expires; // when the user can no longer rent it
+        uint256 expires;
     }
 
     // events for nft rentals
@@ -58,7 +57,9 @@ contract AvianRentExchange is ReentrancyGuard {
         uint256 indexed tokenId
     );
 
-    modifier notRListed( // Modifier to check whether a given erc4907 token is not listed or not
+    // modifiers for the marketplace
+
+    modifier notRListed(
         address nftAddress,
         uint256 tokenId
     ) {
@@ -90,7 +91,7 @@ contract AvianRentExchange is ReentrancyGuard {
         _;
     }
 
-    // mapping for basics
+    // state variables to match as in the proxy context (order should be maintained)
 
     address private _marketOwner;
 
@@ -98,11 +99,11 @@ contract AvianRentExchange is ReentrancyGuard {
 
     uint64 private _maxInstallments = 10;
 
-    mapping(address => mapping(uint256 => Listing_rent)) private r_listings;   // Holds the erc 4907 for rent listings _listingMap 
+    mapping(address => mapping(uint256 => Listing_rent)) private r_listings;
 
-    mapping(address => EnumerableSet.UintSet) private r_address_tokens; // maps rent nft contracts to set of the tokens that are listed
+    mapping(address => EnumerableSet.UintSet) private r_address_tokens;
 
-    EnumerableSet.AddressSet private r_address; // tracks the rent nft contracts that have been listed
+    EnumerableSet.AddressSet private r_address;
 
     Counters.Counter private r_listed;
 
@@ -160,7 +161,7 @@ contract AvianRentExchange is ReentrancyGuard {
 
     // Unlisting functionality
 
-    function unlistNFT(                                 // for erc4907 listings
+    function unlistNFT(                          
         address nftAddress, 
         uint256 tokenId
     ) public payable 
@@ -186,7 +187,7 @@ contract AvianRentExchange is ReentrancyGuard {
         return("NFT Successfully unlisted");
     }
 
-    // start of the rental functions
+    // rental functionality
 
     function rentNFT(
         address nftContract,
@@ -222,58 +223,7 @@ contract AvianRentExchange is ReentrancyGuard {
         return("NFT successfully rented");
     }
 
-    function getARListing(        // Get a specific r_listing
-        address nftAddress, 
-        uint256 tokenId
-    ) external view
-        returns (Listing_rent memory)
-    {
-        return r_listings[nftAddress][tokenId];
-    }
-
-    function getRentListings(
-    ) public view 
-        returns (Listing_rent[] memory) 
-    {
-        Listing_rent[] memory listings = new Listing_rent[](r_listed.current());
-        uint256 listingsIndex = 0;
-        address[] memory nftContracts = EnumerableSet.values(r_address);
-
-        for (uint i = 0; i < nftContracts.length; i++) {
-            address nftAddress = nftContracts[i];
-            uint256[] memory tokens = EnumerableSet.values(r_address_tokens[nftAddress]);
-            for (uint j = 0; j < tokens.length; j++) {
-                listings[listingsIndex] = r_listings[nftAddress][tokens[j]];
-                listingsIndex++;
-            }
-        }
-        return listings;
-    }
-
-    function getListingFee(
-    ) public view 
-        returns (uint256) 
-    {
-        return _listingFee;
-    }
-
-    function getRListedAdddresses(
-    ) public view 
-        returns (address[] memory) 
-    {
-        address[] memory nftContracts = EnumerableSet.values(r_address);
-        return nftContracts;
-    }
-
-    function getRListedAdddressTokens(
-        address nftAddress
-    ) public view 
-        returns (uint256[] memory) 
-    {
-        uint256[] memory tokens = EnumerableSet.values(r_address_tokens[nftAddress]);
-        return tokens;
-    }
-
+    // functions to check whether a given address, token id pair represent a valid nft
 
     function isRentableNFT(address nftContract) public view returns (bool) {
         bool _isRentable = false;

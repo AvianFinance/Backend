@@ -56,7 +56,9 @@ contract ASE_Proxy is ReentrancyGuard {
         address indexed newImplAddrs
     );
 
-    modifier notSListed( // Modifier to check whether a given erc721 token is not listed or not
+    // modifiers for marketplace checks
+
+    modifier notSListed( 
         address nftAddress,
         uint256 tokenId
     ) {
@@ -67,7 +69,6 @@ contract ASE_Proxy is ReentrancyGuard {
         _;
     }
 
-
     modifier isSListed(address nftAddress, uint256 tokenId) {
         Listing_sell memory listing = s_listings[nftAddress][tokenId];
         if (listing.price <= 0) {
@@ -75,7 +76,6 @@ contract ASE_Proxy is ReentrancyGuard {
         }
         _;
     }
-
 
     modifier isOwner(
         address nftAddress,
@@ -90,20 +90,19 @@ contract ASE_Proxy is ReentrancyGuard {
         _;
     }
 
-
     // State Variables for the proxy
 
     address private _marketOwner;
 
     uint256 private _listingFee = .01 ether;
 
-    mapping(address => mapping(uint256 => Listing_sell)) private s_listings;   // Holds the erc 721 for basic listings
- 
+    mapping(address => mapping(uint256 => Listing_sell)) private s_listings;   
+
     mapping(address => uint256) private s_proceeds;
     
-    mapping(address => EnumerableSet.UintSet) private s_address_tokens; // maps buy sell nft contracts to set of the tokens that are listed
+    mapping(address => EnumerableSet.UintSet) private s_address_tokens; 
 
-    EnumerableSet.AddressSet private s_address; // tracks the rent nft contracts that have been listed
+    EnumerableSet.AddressSet private s_address; 
 
     Counters.Counter private s_listed;
 
@@ -126,7 +125,6 @@ contract ASE_Proxy is ReentrancyGuard {
         return(abi.decode(data, (string)));
     }
 
-
     // Unlisting functionality
 
     function cancelListing(                           
@@ -137,7 +135,6 @@ contract ASE_Proxy is ReentrancyGuard {
         require(success, "transaction failed");
         return(abi.decode(data, (string)));
     }
-
 
     // Buying and selling functionality
 
@@ -170,9 +167,9 @@ contract ASE_Proxy is ReentrancyGuard {
         return(abi.decode(data, (string)));
     }
 
-    // Getter Functions
+    // Get a specific s_listing
 
-    function getASListing(        // Get a specific s_listing
+    function getASListing(       
         address nftAddress, 
         uint256 tokenId
     ) external view
@@ -181,8 +178,9 @@ contract ASE_Proxy is ReentrancyGuard {
         return s_listings[nftAddress][tokenId];
     }
 
+    // Get the proceeds available for a seller
 
-    function getProceeds(       // Get the proceeds available for a seller
+    function getProceeds(       
         address seller
     ) external view 
         returns (uint256) 
@@ -190,24 +188,7 @@ contract ASE_Proxy is ReentrancyGuard {
         return s_proceeds[seller];
     }
 
-    function getSellListings(
-    ) public view 
-        returns (Listing_sell[] memory) 
-    {
-        Listing_sell[] memory listings = new Listing_sell[](s_listed.current());
-        uint256 listingsIndex = 0;
-        address[] memory nftContracts = EnumerableSet.values(s_address);
-
-        for (uint i = 0; i < nftContracts.length; i++) {
-            address nftAddress = nftContracts[i];
-            uint256[] memory tokens = EnumerableSet.values(s_address_tokens[nftAddress]);
-            for (uint j = 0; j < tokens.length; j++) {
-                listings[listingsIndex] = s_listings[nftAddress][tokens[j]];
-                listingsIndex++;
-            }
-        }
-        return listings;
-    }
+    // get the set of nft addresses listed for selling in the marketplace
 
     function getSListedAdddresses(
     ) public view 
@@ -217,6 +198,8 @@ contract ASE_Proxy is ReentrancyGuard {
         return nftContracts;
     }
 
+    // get the set of nft token ids of a given nft address listed for selling
+
     function getSListedAdddressTokens(
         address nftAddress
     ) public view 
@@ -225,6 +208,8 @@ contract ASE_Proxy is ReentrancyGuard {
         uint256[] memory tokens = EnumerableSet.values(s_address_tokens[nftAddress]);
         return tokens;
     }
+
+    // function to check whether a given token is 721 or not
 
     function isNFT(address nftContract) public view returns (bool) {
         bool _isNFT = false;
@@ -236,8 +221,7 @@ contract ASE_Proxy is ReentrancyGuard {
         }
         return _isNFT;
     }
-
-        // Implementation upgrade logic
+    // upgrade functionality
 
     function updateImplContract(
         address newImplAddrs

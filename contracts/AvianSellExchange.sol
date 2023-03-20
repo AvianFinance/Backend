@@ -30,6 +30,8 @@ contract AvianSellExchange is ReentrancyGuard {
         uint256 price;
     }
 
+    // events for the basic buy/sell functions
+
     event ItemListed(
         address indexed seller,
         address indexed nftAddress,
@@ -50,6 +52,8 @@ contract AvianSellExchange is ReentrancyGuard {
         uint256 price
     );
 
+    // modifiers for marketplace checks
+
     modifier notSListed( 
         address nftAddress,
         uint256 tokenId
@@ -61,7 +65,6 @@ contract AvianSellExchange is ReentrancyGuard {
         _;
     }
 
-
     modifier isSListed(address nftAddress, uint256 tokenId) {
         Listing_sell memory listing = s_listings[nftAddress][tokenId];
         if (listing.price <= 0) {
@@ -69,7 +72,6 @@ contract AvianSellExchange is ReentrancyGuard {
         }
         _;
     }
-
 
     modifier isOwner(
         address nftAddress,
@@ -84,20 +86,19 @@ contract AvianSellExchange is ReentrancyGuard {
         _;
     }
 
-
-    // mapping for basics
+    // state variables to match as in the proxy context (order should be maintained)
 
     address private _marketOwner;
 
     uint256 private _listingFee = .01 ether;
 
-    mapping(address => mapping(uint256 => Listing_sell)) private s_listings;   // Holds the erc 721 for basic listings
- 
+    mapping(address => mapping(uint256 => Listing_sell)) private s_listings;   
+
     mapping(address => uint256) private s_proceeds;
     
-    mapping(address => EnumerableSet.UintSet) private s_address_tokens; // maps buy sell nft contracts to set of the tokens that are listed
+    mapping(address => EnumerableSet.UintSet) private s_address_tokens; 
 
-    EnumerableSet.AddressSet private s_address; // tracks the rent nft contracts that have been listed
+    EnumerableSet.AddressSet private s_address; 
 
     Counters.Counter private s_listed;
 
@@ -134,10 +135,9 @@ contract AvianSellExchange is ReentrancyGuard {
         return("NFT Listed successfully for upright selling");
     }
 
-
     // Unlisting functionality
 
-    function cancelListing(                             // For erc721 listings
+    function cancelListing(                           
         address nftAddress, 
         uint256 tokenId
     ) external
@@ -159,7 +159,7 @@ contract AvianSellExchange is ReentrancyGuard {
 
     // Buying and selling functionality
 
-    function buyItem(           // Buy a nft listed in the s_listings map
+    function buyItem(
         address nftAddress, 
         uint256 tokenId
     ) external payable
@@ -170,7 +170,7 @@ contract AvianSellExchange is ReentrancyGuard {
         if (msg.value < listedItem.price) {
             revert PriceNotMet(nftAddress, tokenId, listedItem.price);
         }
-        s_proceeds[listedItem.owner] += msg.value; // https://fravoll.github.io/solidity-patterns/pull_over_push.html
+        s_proceeds[listedItem.owner] += msg.value;
 
         delete s_listings[nftAddress][tokenId];
 
@@ -220,61 +220,7 @@ contract AvianSellExchange is ReentrancyGuard {
         return("Successfully transferred the proceeds");
     }
 
-    // Getter Functions
-
-    function getASListing(        // Get a specific s_listing
-        address nftAddress, 
-        uint256 tokenId
-    ) external view
-        returns (Listing_sell memory)
-    {
-        return s_listings[nftAddress][tokenId];
-    }
-
-
-    function getProceeds(       // Get the proceeds available for a seller
-        address seller
-    ) external view 
-        returns (uint256) 
-    {
-        return s_proceeds[seller];
-    }
-
-    function getSellListings(
-    ) public view 
-        returns (Listing_sell[] memory) 
-    {
-        Listing_sell[] memory listings = new Listing_sell[](s_listed.current());
-        uint256 listingsIndex = 0;
-        address[] memory nftContracts = EnumerableSet.values(s_address);
-
-        for (uint i = 0; i < nftContracts.length; i++) {
-            address nftAddress = nftContracts[i];
-            uint256[] memory tokens = EnumerableSet.values(s_address_tokens[nftAddress]);
-            for (uint j = 0; j < tokens.length; j++) {
-                listings[listingsIndex] = s_listings[nftAddress][tokens[j]];
-                listingsIndex++;
-            }
-        }
-        return listings;
-    }
-
-    function getSListedAdddresses(
-    ) public view 
-        returns (address[] memory) 
-    {
-        address[] memory nftContracts = EnumerableSet.values(s_address);
-        return nftContracts;
-    }
-
-    function getSListedAdddressTokens(
-        address nftAddress
-    ) public view 
-        returns (uint256[] memory) 
-    {
-        uint256[] memory tokens = EnumerableSet.values(s_address_tokens[nftAddress]);
-        return tokens;
-    }
+    // function to check whether a given address, token id pair represent a valid nft
 
     function isNFT(address nftContract) public view returns (bool) {
         bool _isNFT = false;

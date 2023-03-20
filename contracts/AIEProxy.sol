@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
@@ -37,6 +36,8 @@ contract AIE_Proxy is ReentrancyGuard {
         uint256 paidIns;
     }
 
+    // events for nft rentals
+
     event INSNFTListed(
         address indexed owner,
         address indexed user,
@@ -66,6 +67,8 @@ contract AIE_Proxy is ReentrancyGuard {
         address indexed marketowner,
         address indexed newImplAddrs
     );
+
+    // modifiers for the marketplace
 
     modifier notIListed(
         address nftAddress,
@@ -107,11 +110,11 @@ contract AIE_Proxy is ReentrancyGuard {
 
     uint64 private _maxInstallments = 10;
 
-    mapping(address => mapping(uint256 => Listing_installment)) private i_listings;   // Holds the erc 4907 for installment based rentings
+    mapping(address => mapping(uint256 => Listing_installment)) private i_listings;   
 
-    mapping(address => EnumerableSet.UintSet) private i_address_tokens; // maps installment based rent nft contracts to set of the tokens that are listed
+    mapping(address => EnumerableSet.UintSet) private i_address_tokens;
 
-    EnumerableSet.AddressSet private i_address; // tracks the ins basede rent nft contracts that have been listed
+    EnumerableSet.AddressSet private i_address; 
 
     Counters.Counter private i_listed;
 
@@ -187,28 +190,6 @@ contract AIE_Proxy is ReentrancyGuard {
         return(abi.decode(data, (string)));
     }
 
-    // Implementation upgrade logic
-
-    function updateImplContract(
-        address newImplAddrs
-    ) external
-        nonReentrant
-    {
-        require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
-        impl_installment = newImplAddrs;
-        emit ImplUpgrade(
-            _marketOwner,
-            impl_installment
-        );
-    }
-
-    function getImplAddrs(
-    ) public view 
-        returns (address) 
-    {
-        return impl_installment;
-    }
-
     // Get an individual listing
 
     function getAInsListing(        
@@ -271,5 +252,27 @@ contract AIE_Proxy is ReentrancyGuard {
             return false;
         }
         return _isNFT;
+    }
+
+    // Implementation upgrade logic
+
+    function updateImplContract(
+        address newImplAddrs
+    ) external
+        nonReentrant
+    {
+        require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
+        impl_installment = newImplAddrs;
+        emit ImplUpgrade(
+            _marketOwner,
+            impl_installment
+        );
+    }
+
+    function getImplAddrs(
+    ) public view 
+        returns (address) 
+    {
+        return impl_installment;
     }
 }

@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
@@ -34,6 +33,8 @@ contract ARE_Proxy is ReentrancyGuard {
         uint256 expires; 
     }
 
+    // events for nft rentals
+
     event NFTListed(
         address indexed owner,
         address indexed user,
@@ -60,6 +61,8 @@ contract ARE_Proxy is ReentrancyGuard {
         address indexed marketowner,
         address indexed newImplAddrs
     );
+
+    // modifiers for the marketplace
 
     modifier notRListed( 
         address nftAddress,
@@ -101,11 +104,11 @@ contract ARE_Proxy is ReentrancyGuard {
 
     uint64 private _maxInstallments = 10;
 
-    mapping(address => mapping(uint256 => Listing_rent)) private r_listings;   // Holds the erc 4907 for rent listings _listingMap 
+    mapping(address => mapping(uint256 => Listing_rent)) private r_listings;  
 
-    mapping(address => EnumerableSet.UintSet) private r_address_tokens; // maps rent nft contracts to set of the tokens that are listed
+    mapping(address => EnumerableSet.UintSet) private r_address_tokens; 
 
-    EnumerableSet.AddressSet private r_address; // tracks the rent nft contracts that have been listed
+    EnumerableSet.AddressSet private r_address;
 
     Counters.Counter private r_listed;
 
@@ -151,7 +154,9 @@ contract ARE_Proxy is ReentrancyGuard {
         return(abi.decode(data, (string)));
     }
 
-    function getARListing(        // Get a specific r_listing
+    // Get a specific r_listing
+
+    function getARListing(
         address nftAddress, 
         uint256 tokenId
     ) external view
@@ -160,31 +165,7 @@ contract ARE_Proxy is ReentrancyGuard {
         return r_listings[nftAddress][tokenId];
     }
 
-    function getRentListings(
-    ) public view 
-        returns (Listing_rent[] memory) 
-    {
-        Listing_rent[] memory listings = new Listing_rent[](r_listed.current());
-        uint256 listingsIndex = 0;
-        address[] memory nftContracts = EnumerableSet.values(r_address);
-
-        for (uint i = 0; i < nftContracts.length; i++) {
-            address nftAddress = nftContracts[i];
-            uint256[] memory tokens = EnumerableSet.values(r_address_tokens[nftAddress]);
-            for (uint j = 0; j < tokens.length; j++) {
-                listings[listingsIndex] = r_listings[nftAddress][tokens[j]];
-                listingsIndex++;
-            }
-        }
-        return listings;
-    }
-
-    function getListingFee(
-    ) public view 
-        returns (uint256) 
-    {
-        return _listingFee;
-    }
+    // get the set of nft addresses listed for renting in the marketplace
 
     function getRListedAdddresses(
     ) public view 
@@ -194,6 +175,8 @@ contract ARE_Proxy is ReentrancyGuard {
         return nftContracts;
     }
 
+    // get the set of nft token ids of a given nft address listed for renting
+
     function getRListedAdddressTokens(
         address nftAddress
     ) public view 
@@ -202,6 +185,17 @@ contract ARE_Proxy is ReentrancyGuard {
         uint256[] memory tokens = EnumerableSet.values(r_address_tokens[nftAddress]);
         return tokens;
     }
+
+    // get the listing fee for rentals
+
+    function getListingFee(
+    ) public view 
+        returns (uint256) 
+    {
+        return _listingFee;
+    }
+
+    // functions to check whether a given token is 721 or 4907
 
     function isRentableNFT(address nftContract) public view returns (bool) {
         bool _isRentable = false;
@@ -230,7 +224,7 @@ contract ARE_Proxy is ReentrancyGuard {
         return _isNFT;
     }
 
-        // Implementation upgrade logic
+    // upgrade functionality
 
     function updateImplContract(
         address newImplAddrs

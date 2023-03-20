@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
@@ -37,6 +36,7 @@ contract AvianInsExchange is ReentrancyGuard {
         uint256 paidIns;
     }
 
+    // events for nft rentals
 
     event INSNFTListed(
         address indexed owner,
@@ -63,7 +63,9 @@ contract AvianInsExchange is ReentrancyGuard {
         uint256 indexed tokenId
     );
 
-    modifier notIListed( // Modifier to check whether a given erc4907 token is not listed or not for installment based
+    // modifiers for the marketplace
+
+    modifier notIListed( 
         address nftAddress,
         uint256 tokenId
     ) {
@@ -95,7 +97,7 @@ contract AvianInsExchange is ReentrancyGuard {
         _;
     }
 
-    // State Variables for the installment implementation
+    // state variables to match as in the proxy context (order should be maintained)
 
     address private _marketOwner;
 
@@ -103,11 +105,11 @@ contract AvianInsExchange is ReentrancyGuard {
 
     uint64 private _maxInstallments = 10;
 
-    mapping(address => mapping(uint256 => Listing_installment)) private i_listings;   // Holds the erc 4907 for installment based rentings
+    mapping(address => mapping(uint256 => Listing_installment)) private i_listings;   
 
-    mapping(address => EnumerableSet.UintSet) private i_address_tokens; // maps installment based rent nft contracts to set of the tokens that are listed
+    mapping(address => EnumerableSet.UintSet) private i_address_tokens;
 
-    EnumerableSet.AddressSet private i_address; // tracks the ins basede rent nft contracts that have been listed
+    EnumerableSet.AddressSet private i_address; 
 
     Counters.Counter private i_listed;
 
@@ -115,7 +117,9 @@ contract AvianInsExchange is ReentrancyGuard {
         _marketOwner = msg.sender;
     }
 
-    function listInsBasedNFT( // installment based
+    // Listing Functionality
+
+    function listInsBasedNFT(
         address nftAddress,
         uint256 tokenId,
         uint256 pricePerDay
@@ -190,72 +194,7 @@ contract AvianInsExchange is ReentrancyGuard {
         return("Successfully removed the listing");
     }
 
-
-    function getAInsListing(        // Get a specific s_listing
-        address nftAddress, 
-        uint256 tokenId
-    ) external view
-        returns (Listing_installment memory)
-    {
-        return i_listings[nftAddress][tokenId];
-    }
-
-    function getListingFee(
-    ) public view 
-        returns (uint256) 
-    {
-        return _listingFee;
-    }
-
-    function getInsListedAdddresses(
-    ) public view 
-        returns (address[] memory) 
-    {
-        address[] memory nftContracts = EnumerableSet.values(i_address);
-        return nftContracts;
-    }
-
-    function getInsListedAdddressTokens(
-        address nftAddress
-    ) public view 
-        returns (uint256[] memory) 
-    {
-        uint256[] memory tokens = EnumerableSet.values(i_address_tokens[nftAddress]);
-        return tokens;
-    }
-
-
-    // start of the rental functions
-
-
-    function isRentableNFT(address nftContract) public view returns (bool) {
-        bool _isRentable = false;
-        bool _isNFT = false;
-        try IERC165(nftContract).supportsInterface(type(IERC4907).interfaceId) returns (bool rentable) {
-            _isRentable = rentable;
-        } catch {
-            return false;
-        }
-        try IERC165(nftContract).supportsInterface(type(IERC721).interfaceId) returns (bool nft) {
-            _isNFT = nft;
-        } catch {
-            return false;
-        }
-        return _isRentable && _isNFT;
-    }
-
-    function isNFT(address nftContract) public view returns (bool) {
-        bool _isNFT = false;
-
-        try IERC165(nftContract).supportsInterface(type(IERC721).interfaceId) returns (bool nft) {
-            _isNFT = nft;
-        } catch {
-            return false;
-        }
-        return _isNFT;
-    }
-
-    //-----------------------------------------
+    // rent functionality
 
     function rentINSNFT(
         address nftContract,
@@ -300,6 +239,7 @@ contract AvianInsExchange is ReentrancyGuard {
         return("Successfully rented the nft by paying the first installment");
     }
 
+    // installment calculation functionality
 
     function calculateInstallment(
         uint256 totalPaid,
@@ -331,28 +271,7 @@ contract AvianInsExchange is ReentrancyGuard {
         return installment_amount;
     }
 
-    // function getNftInstallment(
-    //     Listing_installment memory listing,
-    //     uint256 pricePerDay,
-    //     uint256 totalPaid,
-    //     uint installmentIndex,
-    //     uint64 installmentCount
-    // ) public pure 
-    //     returns (uint256) 
-    // {
-    //     uint256 nextIns = 0;
-
-    //     if (listing.installmentCount==0){
-    //         nextIns = calculateInstallment(0,installmentCount,pricePerDay,1);
-    //     }else {
-    //         uint64 currIndex = listing.installmentIndex;
-    //         uint64 nextIndex = currIndex + 1;
-    //         nextIns = calculateInstallment(totalPaid,listing.installmentCount,pricePerDay,nextIndex);
-    //     }
-
-    //     return nextIns;
-    // }
-
+    // installment payment functionality
 
     function payNFTIns(
         address nftContract,
@@ -398,5 +317,36 @@ contract AvianInsExchange is ReentrancyGuard {
         );
 
         return("Successfully paid the installment");
+    }
+
+
+    // functions to check whether a given address, token id pair represent a valid nft
+
+
+    function isRentableNFT(address nftContract) public view returns (bool) {
+        bool _isRentable = false;
+        bool _isNFT = false;
+        try IERC165(nftContract).supportsInterface(type(IERC4907).interfaceId) returns (bool rentable) {
+            _isRentable = rentable;
+        } catch {
+            return false;
+        }
+        try IERC165(nftContract).supportsInterface(type(IERC721).interfaceId) returns (bool nft) {
+            _isNFT = nft;
+        } catch {
+            return false;
+        }
+        return _isRentable && _isNFT;
+    }
+
+    function isNFT(address nftContract) public view returns (bool) {
+        bool _isNFT = false;
+
+        try IERC165(nftContract).supportsInterface(type(IERC721).interfaceId) returns (bool nft) {
+            _isNFT = nft;
+        } catch {
+            return false;
+        }
+        return _isNFT;
     }
 }
