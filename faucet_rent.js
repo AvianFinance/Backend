@@ -17,22 +17,18 @@ async function rexchange_handler(cond, signer){ // For handling outright rental 
         response =  await ListRentNFT(token_ID,price,signer,stand)
         console.log(response)
     }
-    else if (cond==2){ // view all the nfts listed for outright renting
-        response = await ViewRentListing(provider)
-        console.log(response)
-    }
-    else if (cond==3){ // rent the nft
+    else if (cond==2){ // rent the nft
         token_ID = 29
         n_days = 3
         price = 0.06
         response = await rentNFT(token_ID,signer,stand,n_days,price)
         console.log(response)
     }
-    else if (cond==4){ // View the collection addresses listed for renting
+    else if (cond==3){ // View the collection addresses listed for renting
         response = await ViewRentListedAddrs(provider) 
         console.log(response)
     }
-    else if (cond==5){ // view the token ids listed under a given collection for renting
+    else if (cond==4){ // view the token ids listed under a given collection for renting
         response = await ViewRentListedAddrTokens(stand,provider) 
         console.log(response)
     }

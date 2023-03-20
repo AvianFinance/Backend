@@ -36,16 +36,6 @@ async function ListRentNFT(tokenId,amount,signer,std) {
         `NFT with ID ${tokenId} listed by owner ${mintedBy}.`)
 }
 
-async function ViewRentListing(provider) {
-
-    const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, provider)
-
-    console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getRentListings()
-
-    return("Listing data: ", tx)
-}
-
 async function ViewRentListedAddrs(provider) {
 
     const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, provider)
@@ -87,7 +77,6 @@ async function rentNFT(tokenID,signer,std,days,amount) {
 
 module.exports = {
     ListRentNFT,
-    ViewRentListing,
     ViewRentListedAddrs,
     ViewRentListedAddrTokens,
     rentNFT

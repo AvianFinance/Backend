@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat")
 const { mintNFT } = require('./scripts/mint_nft')
 const { pullProceeds } = require('./scripts/get_proceeds')
-const { ListNFT, UpdateListing, ViewASellListing, ViewSellListing, ViewSellListedAddrs, ViewSellListedAddrTokens, buyNFT} = require('./scripts/sexchange_functions')
+const { ListNFT, UpdateListing, ViewASellListing, ViewSellListedAddrs, ViewSellListedAddrTokens, buyNFT} = require('./scripts/sexchange_functions')
 
 const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
 const signer_m = new ethers.Wallet("7e0dd21cba3952c769b9a90376893a351d4ac356aeacd0e537f5022e08593528", provider); // Meelan Credentials
@@ -42,15 +42,11 @@ async function sexchange_handler(cond, signer){ // For handling buy sell related
         response = await pullProceeds(signer)
         console.log(response)
     }
-    else if (cond==7){ // view the set of sell listings
-        response = await ViewSellListing(provider)
-        console.log(response)
-    }
-    else if (cond==8){ // View the set of collection addresses listed for selling
+    else if (cond==7){ // View the set of collection addresses listed for selling
         response = await ViewSellListedAddrs(provider) 
         console.log(response)
     }
-    else if (cond==9){ // View the set of token ids listed under a given collection for selling
+    else if (cond==8){ // View the set of token ids listed under a given collection for selling
         response = await ViewSellListedAddrTokens(stand,provider) 
         console.log(response)
     }

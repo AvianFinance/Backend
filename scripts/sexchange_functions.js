@@ -63,16 +63,6 @@ async function ViewASellListing(tokenId, signer, std) {
     return("Listing data: ", tx)
 }
 
-async function ViewSellListing(provider) { // For viewving 
-
-    const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, provider)
-
-    console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getSellListings()
-
-    return("Listing data: ", tx)
-}
-
 async function ViewSellListedAddrs(provider) {
 
     const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, provider)
@@ -120,7 +110,6 @@ module.exports = {
     ListNFT,
     UpdateListing,
     ViewASellListing,
-    ViewSellListing,
     ViewSellListedAddrs,
     ViewSellListedAddrTokens,
     buyNFT
