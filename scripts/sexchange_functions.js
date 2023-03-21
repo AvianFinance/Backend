@@ -45,7 +45,7 @@ async function cancelListing(tokenId,signer,std) {
 
     await tx.wait(1)
 
-    return("Listing cancellec succesfully: ")
+    return("Listing cancelled succesfully")
 }
 
 async function UpdateListing(tokenId,price,signer,std) {

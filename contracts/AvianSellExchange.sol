@@ -143,7 +143,7 @@ contract AvianSellExchange is ReentrancyGuard {
     ) external
         isOwner(nftAddress, tokenId, msg.sender)
         isSListed(nftAddress, tokenId)
-    {
+    returns(string memory){
         delete s_listings[nftAddress][tokenId];
 
         EnumerableSet.remove(s_address_tokens[nftAddress], tokenId);
@@ -154,6 +154,7 @@ contract AvianSellExchange is ReentrancyGuard {
         s_listed.decrement();
 
         emit ItemCanceled(msg.sender, nftAddress, tokenId);
+        return("NFT unlisted successfully");
     }
 
 
