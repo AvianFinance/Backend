@@ -12,26 +12,26 @@ stand = "ERC4907" // token type : set correctly before initiating
 async function rexchange_handler(cond, signer){ // For handling outright rental related scenarios
 
     if (cond==1){ // list a new NFT for rentals
-        token_ID = 29
-        price = 0.06
+        token_ID = 11
+        price = 0.03
         response =  await ListRentNFT(token_ID,price,signer,stand)
         console.log(response)
     }
     else if (cond==2){ // unlist the nft
-        token_ID = 29
+        token_ID = 11
         response = await cancelRentNFT(token_ID,signer,stand)
         console.log(response)
     }
     else if (cond==3){ // update the nft
-        token_ID = 29
-        price = 0.06
+        token_ID = 11
+        price = 0.04
         response = await updateRentNFT(token_ID,price,signer,stand)
         console.log(response)
     }
     else if (cond==4){ // rent the nft
-        token_ID = 29
+        token_ID = 11
         n_days = 3
-        price = 0.06
+        price = 0.04
         response = await rentNFT(token_ID,signer,stand,n_days,price)
         console.log(response)
     }
@@ -44,13 +44,13 @@ async function rexchange_handler(cond, signer){ // For handling outright rental 
         console.log(response)
     }
     else if (cond==7){ // view the token ids listed under a given collection for renting
-        token_ID = 29
-        response = await ViewARentListing(tokenID,provider,stand) 
+        token_ID = 11
+        response = await ViewARentListing(token_ID,provider,stand) 
         console.log(response)
     }
 }
 
-rexchange_handler(2,signer_m)
+rexchange_handler(7,signer_m)
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error)
