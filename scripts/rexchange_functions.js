@@ -3,7 +3,7 @@ const { rexchange_token } = require('../config')
 const fs = require('fs');
 const {get_standard} = require('../services/token_standard')
 
-const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianRentExchange.sol/AvianRentExchange.json', 'utf-8'))
+const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AREProxy.sol/ARE_Proxy.json', 'utf-8'))
 
 async function ListRentNFT(tokenId,amount,signer,std) {
 
@@ -36,12 +36,51 @@ async function ListRentNFT(tokenId,amount,signer,std) {
         `NFT with ID ${tokenId} listed by owner ${mintedBy}.`)
 }
 
-async function ViewRentListing(provider) {
+async function cancelRentNFT(tokenId,signer,std) {
 
-    const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, provider)
+    const standard = await get_standard(std)
+
+    const token_address = standard.addr;
+    const nft_token = standard.token;
+
+    const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, signer)
+    const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
+
+    console.log("cancelling rent NFT listing...")
+    const tx = await mplace_contract.unlistNFT(token_contract.address, tokenId)
+
+    await tx.wait(1)
+    console.log("NFT unlisted with token ID: ", tokenId.toString())
+}
+
+async function updateRentNFT(tokenId,amount,signer,std) {
+
+    const standard = await get_standard(std)
+
+    const token_address = standard.addr;
+    const nft_token = standard.token;
+
+    const PRICE = ethers.utils.parseEther(amount.toString())
+
+    const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, signer)
+    const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
+
+    console.log("updating rent NFT listing...")
+    const tx = await mplace_contract.updateNFT(token_contract.address, tokenId, PRICE)
+
+    await tx.wait(1)
+    console.log("NFT with token ID, updated: ", tokenId.toString())
+}
+
+async function ViewARentListing(tokenId, signer, std) {
+
+    const standard = await get_standard(std)
+    const token_address = standard.addr;
+
+    const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, signer)
 
     console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getRentListings()
+    const tx = await mplace_contract.getARListing(token_address, tokenId)
 
     return("Listing data: ", tx)
 }
@@ -87,7 +126,9 @@ async function rentNFT(tokenID,signer,std,days,amount) {
 
 module.exports = {
     ListRentNFT,
-    ViewRentListing,
+    cancelRentNFT,
+    updateRentNFT,
+    ViewARentListing,
     ViewRentListedAddrs,
     ViewRentListedAddrTokens,
     rentNFT

@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat")
 const { mintNFT } = require('./scripts/mint_nft')
-const { pullProceeds } = require('./scripts/get_proceeds')
-const { ListNFT, UpdateListing, ViewASellListing, ViewSellListing, ViewSellListedAddrs, ViewSellListedAddrTokens, buyNFT} = require('./scripts/sexchange_functions')
+const { pullProceeds, viewProceeds } = require('./scripts/get_proceeds')
+const { ListNFT, cancelListing,UpdateListing, ViewASellListing, ViewSellListedAddrs, ViewSellListedAddrTokens, buyNFT} = require('./scripts/sexchange_functions')
 
 const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
 const signer_m = new ethers.Wallet("7e0dd21cba3952c769b9a90376893a351d4ac356aeacd0e537f5022e08593528", provider); // Meelan Credentials
@@ -17,47 +17,52 @@ async function sexchange_handler(cond, signer){ // For handling buy sell related
         console.log(response)
     }
     else if (cond==2){ // list a nft to be sold in the market place
-        token_ID = 2
-        price = 0.06
+        token_ID = 5
+        price = 0.04
         response = await ListNFT(token_ID,price,signer,stand)
         console.log(response)
     }
-    else if (cond==3){ // view the price and the listing of a NFT
-        token_ID = 2
+    else if (cond==3){ // unlist an already listed sell order
+        token_ID = 5
+        response = await cancelListing(token_ID,signer,stand)
+        console.log(response)
+    }
+    else if (cond==4){ // view the price and the listing of a NFT
+        token_ID = 5
         response = await ViewASellListing(token_ID,provider,stand)
         console.log(response)
     }
-    else if (cond==4){ // update the price of a NFT
-        token_ID = 2
+    else if (cond==5){ // update the price of a NFT
+        token_ID = 5
         price = 0.05
         response = await UpdateListing(token_ID,price,signer,stand) 
         console.log(response)
     }
-    else if (cond==5){ // buy a listed nft
-        token_ID = 2
+    else if (cond==6){ // buy a listed nft
+        token_ID = 5
         response = await buyNFT(token_ID,signer,stand) 
         console.log(response)
     }
-    else if (cond==6){ // pulls available proceeds
+    else if (cond==7){ // view available proceeds
+        response = await viewProceeds(signer)
+        console.log(response)
+    }
+    else if (cond==8){ // pulls available proceeds
         response = await pullProceeds(signer)
         console.log(response)
     }
-    else if (cond==7){ // view the set of sell listings
-        response = await ViewSellListing(provider)
-        console.log(response)
-    }
-    else if (cond==8){ // View the set of collection addresses listed for selling
+    else if (cond==9){ // View the set of collection addresses listed for selling
         response = await ViewSellListedAddrs(provider) 
         console.log(response)
     }
-    else if (cond==9){ // View the set of token ids listed under a given collection for selling
+    else if (cond==10){ // View the set of token ids listed under a given collection for selling
         response = await ViewSellListedAddrTokens(stand,provider) 
         console.log(response)
     }
 }
 
 
-sexchange_handler(9,signer_r)
+sexchange_handler(8,signer_m)
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error)

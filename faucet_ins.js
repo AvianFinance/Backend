@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat")
 
-const { ListInsNFT,ViewAInsListing,view_installment,unlist_nft,rentInsNFT,payNextIns} = require('./scripts/iexchange_functions')
+const { ListInsNFT,ViewAInsListing,ViewInsListedAddrs,ViewInsListedAddrTokens,view_installment,unlist_nft,rentInsNFT,payNextIns} = require('./scripts/iexchange_functions')
 
 const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
 const signer_m = new ethers.Wallet("7e0dd21cba3952c769b9a90376893a351d4ac356aeacd0e537f5022e08593528", provider); // Meelan Credentials
@@ -12,37 +12,45 @@ stand = "ERC4907" // token type : set correctly before initiating
 async function iexchange_handler(cond, signer){ // For handling installment based rental related scenarios
 
     if (cond==1){ // list a new NFT name
-        token_ID = 22
-        price = 0.06
+        token_ID = 5
+        price = 0.04
         response =  await ListInsNFT(token_ID,price,signer,stand)
         console.log(response)
     }
     else if (cond==2){ // view the price and the listing of a NFT
-        token_ID = 22
+        token_ID = 5
         response = await ViewAInsListing(token_ID,provider,stand) 
         console.log(response)
     }
     else if (cond==3){ //  get the next installment
-        token_ID = 22
-        rentalDays = 0
-        response = await view_installment(token_ID,provider,stand,rentalDays)
+        token_ID = 5
+        rentalDays = 4
+        response = await view_installment(token_ID,signer,stand,rentalDays)
     }
     else if (cond==4){ // unlist a nft
-        token_ID = 22
+        token_ID = 5
         response = await unlist_nft(token_ID,signer,stand) 
     }
     else if (cond==5){ // rent the considered nft buy paying the first installment
-        token_ID = 22
+        token_ID = 5
         num_days = 5
         response = await rentInsNFT(token_ID,signer,stand,num_days)
     }
     else if (cond==6){ // pay the next installment
-        token_ID = 22
+        token_ID = 5
         response = await payNextIns(token_ID,signer,stand)
+    }
+    else if (cond==7){ // View the collection addresses listed for renting ins based
+        response = await ViewInsListedAddrs(provider) 
+        console.log(response)
+    }
+    else if (cond==8){ // view the token ids listed under a given collection for renting ins based
+        response = await ViewInsListedAddrTokens(stand,provider) 
+        console.log(response)
     }
 }
 
-iexchange_handler(5,signer_i)
+iexchange_handler(6,signer_r)
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error)

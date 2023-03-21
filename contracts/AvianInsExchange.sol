@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
@@ -24,12 +23,6 @@ contract AvianInsExchange is ReentrancyGuard {
     using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
-    
-    
-    address private _marketOwner;
-    uint256 private _listingFee = .01 ether;
-    uint64 private _maxInstallments = 10;
-
 
     struct Listing_installment { 
         address owner;
@@ -43,6 +36,7 @@ contract AvianInsExchange is ReentrancyGuard {
         uint256 paidIns;
     }
 
+    // events for nft rentals
 
     event INSNFTListed(
         address indexed owner,
@@ -69,18 +63,9 @@ contract AvianInsExchange is ReentrancyGuard {
         uint256 indexed tokenId
     );
 
-    // mapping for basics
+    // modifiers for the marketplace
 
-    mapping(address => mapping(uint256 => Listing_installment)) private i_listings;   // Holds the erc 4907 for installment based rentings
-
-    mapping(address => EnumerableSet.UintSet) private i_address_tokens; // maps installment based rent nft contracts to set of the tokens that are listed
-
-    EnumerableSet.AddressSet private i_address; // tracks the ins basede rent nft contracts that have been listed
-
-    Counters.Counter private i_listed;
-
-
-    modifier notIListed( // Modifier to check whether a given erc4907 token is not listed or not for installment based
+    modifier notIListed( 
         address nftAddress,
         uint256 tokenId
     ) {
@@ -112,18 +97,36 @@ contract AvianInsExchange is ReentrancyGuard {
         _;
     }
 
+    // state variables to match as in the proxy context (order should be maintained)
+
+    address private _marketOwner;
+
+    uint256 private _listingFee = .01 ether;
+
+    uint64 private _maxInstallments = 10;
+
+    mapping(address => mapping(uint256 => Listing_installment)) private i_listings;   
+
+    mapping(address => EnumerableSet.UintSet) private i_address_tokens;
+
+    EnumerableSet.AddressSet private i_address; 
+
+    Counters.Counter private i_listed;
+
     constructor() {
         _marketOwner = msg.sender;
     }
 
-    function listInsBasedNFT( // installment based
+    // Listing Functionality
+
+    function listInsBasedNFT(
         address nftAddress,
         uint256 tokenId,
         uint256 pricePerDay
     ) public payable 
         nonReentrant 
         notIListed(nftAddress, tokenId)
-    {
+    returns(string memory) {
         require(isRentableNFT(nftAddress), "Contract is not an ERC4907");
         require(IERC721(nftAddress).ownerOf(tokenId) == msg.sender, "Not owner of nft");
         require(msg.value == _listingFee, "Not enough ether for listing fee");
@@ -159,6 +162,8 @@ contract AvianInsExchange is ReentrancyGuard {
             tokenId,
             pricePerDay
         );
+
+        return("Successfully listed the NFT for installment based rentals");
     }
 
 
@@ -170,7 +175,7 @@ contract AvianInsExchange is ReentrancyGuard {
     ) public
         isOwner(nftAddress, tokenId, msg.sender)
         isIListed(nftAddress, tokenId)
-    { 
+    returns(string memory){ 
         EnumerableSet.remove(i_address_tokens[nftAddress], tokenId);
 
         delete i_listings[nftAddress][tokenId];
@@ -185,74 +190,11 @@ contract AvianInsExchange is ReentrancyGuard {
             nftAddress,
             tokenId
         );
+
+        return("Successfully removed the listing");
     }
 
-
-    function getAInsListing(        // Get a specific s_listing
-        address nftAddress, 
-        uint256 tokenId
-    ) external view
-        returns (Listing_installment memory)
-    {
-        return i_listings[nftAddress][tokenId];
-    }
-
-    function getListingFee(
-    ) public view 
-        returns (uint256) 
-    {
-        return _listingFee;
-    }
-
-    function getInsListedAdddresses(
-    ) public view 
-        returns (address[] memory) 
-    {
-        address[] memory nftContracts = EnumerableSet.values(i_address);
-        return nftContracts;
-    }
-
-    function getInsListedAdddressTokens(
-        address nftAddress
-    ) public view 
-        returns (uint256[] memory) 
-    {
-        uint256[] memory tokens = EnumerableSet.values(i_address_tokens[nftAddress]);
-        return tokens;
-    }
-
-
-    // start of the rental functions
-
-
-    function isRentableNFT(address nftContract) public view returns (bool) {
-        bool _isRentable = false;
-        bool _isNFT = false;
-        try IERC165(nftContract).supportsInterface(type(IERC4907).interfaceId) returns (bool rentable) {
-            _isRentable = rentable;
-        } catch {
-            return false;
-        }
-        try IERC165(nftContract).supportsInterface(type(IERC721).interfaceId) returns (bool nft) {
-            _isNFT = nft;
-        } catch {
-            return false;
-        }
-        return _isRentable && _isNFT;
-    }
-
-    function isNFT(address nftContract) public view returns (bool) {
-        bool _isNFT = false;
-
-        try IERC165(nftContract).supportsInterface(type(IERC721).interfaceId) returns (bool nft) {
-            _isNFT = nft;
-        } catch {
-            return false;
-        }
-        return _isNFT;
-    }
-
-    //-----------------------------------------
+    // rent functionality
 
     function rentINSNFT(
         address nftContract,
@@ -260,13 +202,18 @@ contract AvianInsExchange is ReentrancyGuard {
         uint64 numDays
     ) public payable 
         nonReentrant 
-    {
+    returns(string memory){
         require(numDays <= _maxInstallments, "Maximum of 10 rental days are allowed");
         require(numDays > 1, "Number of installments must be greater than 1");
 
         Listing_installment storage listing = i_listings[nftContract][tokenId];
 
         require(listing.user == address(0) || block.timestamp > listing.expires, "NFT already rented");
+
+        IERC721 nft = IERC721(nftContract);
+        if (nft.getApproved(tokenId) != address(this)) {
+            revert NotApprovedForMarketplace();
+        }
 
         uint64 expires = uint64(block.timestamp) + 86400;
         
@@ -293,15 +240,18 @@ contract AvianInsExchange is ReentrancyGuard {
             firstIns,
             firstIns
         );
+
+        return("Successfully rented the nft by paying the first installment");
     }
 
+    // installment calculation functionality
 
     function calculateInstallment(
         uint256 totalPaid,
         uint256 installmentCount,
         uint256 pricePerDay,
-        uint installmentIndex
-    ) private pure
+        uint64 installmentIndex
+    ) public pure
         returns (uint256) 
     {
         require(installmentIndex <= installmentCount, "Installment Index should be lesser than the installment count");
@@ -310,11 +260,8 @@ contract AvianInsExchange is ReentrancyGuard {
         uint256 rentalFee = pricePerDay*installmentCount;
 
         uint256 installment_amount;
-        uint sum = 0;
+        uint sum = (installmentCount*(installmentCount+1))/2;
 
-        for (uint i = 1; i <= installmentCount; i++) {
-            sum = sum + i;
-        }
         uint256 unit_price = rentalFee/sum;
 
         if (installmentIndex<installmentCount){
@@ -326,46 +273,25 @@ contract AvianInsExchange is ReentrancyGuard {
         return installment_amount;
     }
 
-    function getNftInstallment(
-        address nftAddress,
-        uint256 tokenId,
-        uint64 installmentCount
-    ) public view 
-        returns (uint256) 
-    {
-
-        Listing_installment storage listing = i_listings[nftAddress][tokenId];
-
-        if (listing.installmentCount>0){
-            installmentCount = listing.installmentCount;
-        }
-
-        uint256 nextIns = 0;
-
-        if (listing.installmentCount==listing.installmentIndex){
-            nextIns = calculateInstallment(0,installmentCount,listing.pricePerDay,1);
-        }else {
-            uint64 currIndex = listing.installmentIndex;
-            uint64 nextIndex = currIndex + 1;
-            nextIns = calculateInstallment(listing.paidIns,installmentCount,listing.pricePerDay,nextIndex);
-        }
-
-        return nextIns;
-    }
-
+    // installment payment functionality
 
     function payNFTIns(
         address nftContract,
         uint256 tokenId
     ) public payable 
         nonReentrant 
-    {
+    returns(string memory){
         Listing_installment storage listing = i_listings[nftContract][tokenId];
 
         require(listing.user == msg.sender, "You are not the current renter");
         require(listing.installmentIndex < listing.installmentCount, "Rental fee is fully paid");
         require(listing.installmentIndex >= 1, "Rental agreement not yet made");
         require(block.timestamp < listing.expires, "NFT expired");
+
+        IERC721 nft = IERC721(nftContract);
+        if (nft.getApproved(tokenId) != address(this)) {
+            revert NotApprovedForMarketplace();
+        }
 
         uint64 expires = listing.expires + 86400;
         uint64 currIndex = listing.installmentIndex;
@@ -396,5 +322,38 @@ contract AvianInsExchange is ReentrancyGuard {
             nextIns,
             totalPaid
         );
+
+        return("Successfully paid the installment");
+    }
+
+
+    // functions to check whether a given address, token id pair represent a valid nft
+
+
+    function isRentableNFT(address nftContract) public view returns (bool) {
+        bool _isRentable = false;
+        bool _isNFT = false;
+        try IERC165(nftContract).supportsInterface(type(IERC4907).interfaceId) returns (bool rentable) {
+            _isRentable = rentable;
+        } catch {
+            return false;
+        }
+        try IERC165(nftContract).supportsInterface(type(IERC721).interfaceId) returns (bool nft) {
+            _isNFT = nft;
+        } catch {
+            return false;
+        }
+        return _isRentable && _isNFT;
+    }
+
+    function isNFT(address nftContract) public view returns (bool) {
+        bool _isNFT = false;
+
+        try IERC165(nftContract).supportsInterface(type(IERC721).interfaceId) returns (bool nft) {
+            _isNFT = nft;
+        } catch {
+            return false;
+        }
+        return _isNFT;
     }
 }

@@ -3,7 +3,7 @@ const { sexchange_token } = require('../config')
 const fs = require('fs');
 const {get_standard} = require('../services/token_standard')
 
-const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/AvianSellExchange.sol/AvianSellExchange.json', 'utf-8'))
+const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/ASEProxy.sol/ASE_Proxy.json', 'utf-8'))
 
 async function ListNFT(tokenId,amount,signer,std) {
 
@@ -33,6 +33,21 @@ async function ListNFT(tokenId,amount,signer,std) {
         `NFT with ID ${tokenId} listed by owner ${mintedBy}.`)
 }
 
+async function cancelListing(tokenId,signer,std) {
+
+    const standard = await get_standard(std)
+    const token_address = standard.addr;
+
+    const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, signer)
+
+    console.log("cancelling the NFT listing...")
+    const tx = await mplace_contract.cancelListing(token_address, tokenId)
+
+    await tx.wait(1)
+
+    return("Listing cancelled succesfully")
+}
+
 async function UpdateListing(tokenId,price,signer,std) {
 
     const standard = await get_standard(std)
@@ -59,16 +74,6 @@ async function ViewASellListing(tokenId, signer, std) {
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getASListing(token_address, tokenId)
-
-    return("Listing data: ", tx)
-}
-
-async function ViewSellListing(provider) { // For viewving 
-
-    const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, provider)
-
-    console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getSellListings()
 
     return("Listing data: ", tx)
 }
@@ -118,9 +123,9 @@ async function buyNFT(tokenID,signer,std) {
 
 module.exports = {
     ListNFT,
+    cancelListing,
     UpdateListing,
     ViewASellListing,
-    ViewSellListing,
     ViewSellListedAddrs,
     ViewSellListedAddrTokens,
     buyNFT
