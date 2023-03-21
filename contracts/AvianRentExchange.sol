@@ -164,7 +164,7 @@ contract AvianRentExchange is ReentrancyGuard {
     function unlistNFT(                          
         address nftAddress, 
         uint256 tokenId
-    ) external payable 
+    ) external
         nonReentrant 
         isOwner(nftAddress, tokenId, msg.sender)
         isRListed(nftAddress, tokenId)
@@ -185,6 +185,36 @@ contract AvianRentExchange is ReentrancyGuard {
         );
 
         return("NFT Successfully unlisted");
+    }
+
+    // List updating Functionality
+
+    function updateRentNFT(
+        address nftAddress,
+        uint256 tokenId,
+        uint256 pricePerDay
+    ) external
+        nonReentrant 
+        isRListed(nftAddress, tokenId)
+    returns (string memory) {
+        require(isRentableNFT(nftAddress), "Contract is not an ERC4907");
+        require(IERC721(nftAddress).ownerOf(tokenId) == msg.sender, "Not owner of nft");
+        require(pricePerDay > 0, "Rental price should be greater than 0");
+
+        Listing_rent storage listing = r_listings[nftAddress][tokenId];
+
+        listing.pricePerDay = pricePerDay;
+
+        emit NFTListed(
+            listing.owner,
+            listing.user,
+            nftAddress,
+            tokenId,
+            pricePerDay,
+            listing.expires
+        );
+
+        return("NFT Successfully listed");
     }
 
     // rental functionality

@@ -142,6 +142,18 @@ contract ARE_Proxy is ReentrancyGuard {
         return(abi.decode(data, (string)));
     }
 
+    // updating functionality
+
+    function updateNFT(                        
+        address nftAddress, 
+        uint256 tokenId,
+        uint256 pricePerDay
+    ) public returns(string memory) { 
+        (bool success, bytes memory data) = impl_rent.delegatecall(abi.encodeWithSignature("updateRentNFT(address,uint256,uint256)", nftAddress, tokenId, pricePerDay));
+        require(success, "transaction failed");
+        return(abi.decode(data, (string)));
+    }
+
     // start of the rental functions
 
     function rentNFT(

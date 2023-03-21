@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat")
 
-const { ListRentNFT, ViewRentListing, ViewRentListedAddrs, ViewRentListedAddrTokens, rentNFT} = require('./scripts/rexchange_functions')
+const { ListRentNFT, cancelRentNFT, updateRentNFT, ViewARentListing,ViewRentListedAddrs, ViewRentListedAddrTokens, rentNFT} = require('./scripts/rexchange_functions')
 
 const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
 const signer_m = new ethers.Wallet("7e0dd21cba3952c769b9a90376893a351d4ac356aeacd0e537f5022e08593528", provider); // Meelan Credentials
@@ -17,19 +17,35 @@ async function rexchange_handler(cond, signer){ // For handling outright rental 
         response =  await ListRentNFT(token_ID,price,signer,stand)
         console.log(response)
     }
-    else if (cond==2){ // rent the nft
+    else if (cond==2){ // unlist the nft
+        token_ID = 29
+        response = await cancelRentNFT(token_ID,signer,stand)
+        console.log(response)
+    }
+    else if (cond==3){ // update the nft
+        token_ID = 29
+        price = 0.06
+        response = await updateRentNFT(token_ID,price,signer,stand)
+        console.log(response)
+    }
+    else if (cond==4){ // rent the nft
         token_ID = 29
         n_days = 3
         price = 0.06
         response = await rentNFT(token_ID,signer,stand,n_days,price)
         console.log(response)
     }
-    else if (cond==3){ // View the collection addresses listed for renting
+    else if (cond==5){ // View the collection addresses listed for renting
         response = await ViewRentListedAddrs(provider) 
         console.log(response)
     }
-    else if (cond==4){ // view the token ids listed under a given collection for renting
+    else if (cond==6){ // view the token ids listed under a given collection for renting
         response = await ViewRentListedAddrTokens(stand,provider) 
+        console.log(response)
+    }
+    else if (cond==7){ // view the token ids listed under a given collection for renting
+        token_ID = 29
+        response = await ViewARentListing(tokenID,provider,stand) 
         console.log(response)
     }
 }

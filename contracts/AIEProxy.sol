@@ -168,12 +168,18 @@ contract AIE_Proxy is ReentrancyGuard {
         uint256 tokenId,
         uint64 installmentCount
     ) public view returns (uint256) {
+        require(installmentCount<=_maxInstallments,"installment count must me less than the maximum allowed installments");
+        require(installmentCount>0,"installment count must be greater than 1");
         Listing_installment storage listing = i_listings[nftAddress][tokenId];
-        if (listing.installmentCount>0){
-            installmentCount = listing.installmentCount;
-        }
+
         uint64 currIndex = listing.installmentIndex;
         uint64 nextIndex = currIndex + 1;
+
+        if (listing.installmentCount>0){
+            installmentCount = listing.installmentCount;
+            require(nextIndex<=installmentCount,"NFT fully paid");
+        }
+
         (bool success, bytes memory data) = impl_installment.staticcall(abi.encodeWithSignature("calculateInstallment(uint256,uint256,uint256,uint64)", listing.paidIns, installmentCount, listing.pricePerDay, nextIndex));
         require(success, "transaction failed");
         return(abi.decode(data, (uint256)));

@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat")
 
-const { ListInsNFT,ViewAInsListing,view_installment,unlist_nft,rentInsNFT,payNextIns} = require('./scripts/iexchange_functions')
+const { ListInsNFT,ViewAInsListing,ViewInsListedAddrs,ViewInsListedAddrTokens,view_installment,unlist_nft,rentInsNFT,payNextIns} = require('./scripts/iexchange_functions')
 
 const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
 const signer_m = new ethers.Wallet("7e0dd21cba3952c769b9a90376893a351d4ac356aeacd0e537f5022e08593528", provider); // Meelan Credentials
@@ -39,6 +39,14 @@ async function iexchange_handler(cond, signer){ // For handling installment base
     else if (cond==6){ // pay the next installment
         token_ID = 25
         response = await payNextIns(token_ID,signer,stand)
+    }
+    else if (cond==7){ // View the collection addresses listed for renting ins based
+        response = await ViewInsListedAddrs(provider) 
+        console.log(response)
+    }
+    else if (cond==8){ // view the token ids listed under a given collection for renting ins based
+        response = await ViewInsListedAddrTokens(stand,provider) 
+        console.log(response)
     }
 }
 

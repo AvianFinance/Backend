@@ -36,34 +36,6 @@ async function ListInsNFT(tokenId,pricePerDay,signer,std) {
         `NFT with ID ${tokenId} listed by owner ${mintedBy}.`)
 }
 
-async function ViewAInsListing(tokenId, signer, std) {
-
-    const standard = await get_standard(std)
-    const token_address = standard.addr;
-
-    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, signer)
-
-    console.log("Retrieving NFT listing data...")
-    const tx = await mplace_contract.getAInsListing(token_address, tokenId)
-
-    return("Listing data: ", tx)
-}
-
-async function view_installment(tokenId,signer,std,rentaldays) {
-
-    const standard = await get_standard(std)
-
-    const token_address = standard.addr;
-    const nft_token = standard.token;
-
-    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, signer)
-    const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
-
-    const tx = await mplace_contract.getNftInstallment(token_contract.address, tokenId, rentaldays)
-
-    console.log("Next installment : ",tx)
-}
-
 async function unlist_nft(tokenId,signer,std) {
 
     const standard = await get_standard(std)
@@ -101,6 +73,21 @@ async function rentInsNFT(tokenId,signer,std, numDays) {
 
 }
 
+async function view_installment(tokenId,signer,std,rentaldays) {
+
+    const standard = await get_standard(std)
+
+    const token_address = standard.addr;
+    const nft_token = standard.token;
+
+    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, signer)
+    const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
+
+    const tx = await mplace_contract.getNftInstallment(token_contract.address, tokenId, rentaldays)
+
+    console.log("Next installment : ",tx)
+}
+
 async function payNextIns(tokenId,signer,std) {
 
     const standard = await get_standard(std)
@@ -129,20 +116,49 @@ async function payNextIns(tokenId,signer,std) {
 
 }
 
+async function ViewAInsListing(tokenId, signer, std) {
 
+    const standard = await get_standard(std)
+    const token_address = standard.addr;
 
+    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, signer)
 
+    console.log("Retrieving NFT listing data...")
+    const tx = await mplace_contract.getAInsListing(token_address, tokenId)
 
+    return("Listing data: ", tx)
+}
 
+async function ViewInsListedAddrs(provider) {
 
+    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, provider)
 
+    console.log("Retrieving NFT listing data...")
+    const tx = await mplace_contract.getInsListedAdddresses() // Gives all the token addresses listed for renting
 
+    return("Listing data: ", tx)
+}
+
+async function ViewInsListedAddrTokens(std,provider) {
+
+    const standard = await get_standard(std)
+    const token_address = standard.addr;
+
+    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, provider)
+
+    console.log("Retrieving NFT listing data...")
+    const tx = await mplace_contract.getInsListedAdddressTokens(token_address) // when the token address is given gives the token ids listed for renting
+
+    return("Listing data: ", tx)
+}
 
 
 
 module.exports = {
     ListInsNFT,
     ViewAInsListing,
+    ViewInsListedAddrs,
+    ViewInsListedAddrTokens,
     view_installment,
     unlist_nft,
     rentInsNFT,

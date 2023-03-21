@@ -33,6 +33,21 @@ async function ListNFT(tokenId,amount,signer,std) {
         `NFT with ID ${tokenId} listed by owner ${mintedBy}.`)
 }
 
+async function cancelListing(tokenId,signer,std) {
+
+    const standard = await get_standard(std)
+    const token_address = standard.addr;
+
+    const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, signer)
+
+    console.log("cancelling the NFT listing...")
+    const tx = await mplace_contract.cancelListing(token_address, tokenId)
+
+    await tx.wait(1)
+
+    return("Listing cancellec succesfully: ")
+}
+
 async function UpdateListing(tokenId,price,signer,std) {
 
     const standard = await get_standard(std)
@@ -108,6 +123,7 @@ async function buyNFT(tokenID,signer,std) {
 
 module.exports = {
     ListNFT,
+    cancelListing,
     UpdateListing,
     ViewASellListing,
     ViewSellListedAddrs,
