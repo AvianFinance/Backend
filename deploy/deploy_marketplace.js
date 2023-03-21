@@ -31,8 +31,8 @@ const fs = require('fs');
 // }
 
 async function main() {  //Create the address for the RimeToken collection
-    const proxy = await hre.ethers.getContractFactory("ARE_Proxy");
-    const impl = await hre.ethers.getContractFactory("AvianRentExchange");
+    const proxy = await hre.ethers.getContractFactory("AIE_Proxy");
+    const impl = await hre.ethers.getContractFactory("AvianInsExchange");
 
     const impl_token = await impl.deploy();
     await impl_token.deployed();

@@ -12,32 +12,32 @@ stand = "ERC4907" // token type : set correctly before initiating
 async function iexchange_handler(cond, signer){ // For handling installment based rental related scenarios
 
     if (cond==1){ // list a new NFT name
-        token_ID = 25
-        price = 0.03
+        token_ID = 5
+        price = 0.04
         response =  await ListInsNFT(token_ID,price,signer,stand)
         console.log(response)
     }
     else if (cond==2){ // view the price and the listing of a NFT
-        token_ID = 25
+        token_ID = 5
         response = await ViewAInsListing(token_ID,provider,stand) 
         console.log(response)
     }
     else if (cond==3){ //  get the next installment
-        token_ID = 25
-        rentalDays = 5
+        token_ID = 5
+        rentalDays = 4
         response = await view_installment(token_ID,signer,stand,rentalDays)
     }
     else if (cond==4){ // unlist a nft
-        token_ID = 25
+        token_ID = 5
         response = await unlist_nft(token_ID,signer,stand) 
     }
     else if (cond==5){ // rent the considered nft buy paying the first installment
-        token_ID = 25
+        token_ID = 5
         num_days = 5
         response = await rentInsNFT(token_ID,signer,stand,num_days)
     }
     else if (cond==6){ // pay the next installment
-        token_ID = 25
+        token_ID = 5
         response = await payNextIns(token_ID,signer,stand)
     }
     else if (cond==7){ // View the collection addresses listed for renting ins based
