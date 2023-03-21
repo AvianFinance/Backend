@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat")
 const { mintNFT } = require('./scripts/mint_nft')
-const { pullProceeds } = require('./scripts/get_proceeds')
+const { pullProceeds, viewProceeds } = require('./scripts/get_proceeds')
 const { ListNFT, cancelListing,UpdateListing, ViewASellListing, ViewSellListedAddrs, ViewSellListedAddrTokens, buyNFT} = require('./scripts/sexchange_functions')
 
 const provider = new ethers.providers.JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc")
@@ -43,15 +43,19 @@ async function sexchange_handler(cond, signer){ // For handling buy sell related
         response = await buyNFT(token_ID,signer,stand) 
         console.log(response)
     }
-    else if (cond==7){ // pulls available proceeds
+    else if (cond==7){ // view available proceeds
+        response = await viewProceeds(signer)
+        console.log(response)
+    }
+    else if (cond==8){ // pulls available proceeds
         response = await pullProceeds(signer)
         console.log(response)
     }
-    else if (cond==8){ // View the set of collection addresses listed for selling
+    else if (cond==9){ // View the set of collection addresses listed for selling
         response = await ViewSellListedAddrs(provider) 
         console.log(response)
     }
-    else if (cond==9){ // View the set of token ids listed under a given collection for selling
+    else if (cond==10){ // View the set of token ids listed under a given collection for selling
         response = await ViewSellListedAddrTokens(stand,provider) 
         console.log(response)
     }

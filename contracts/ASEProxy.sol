@@ -181,11 +181,10 @@ contract ASE_Proxy is ReentrancyGuard {
     // Get the proceeds available for a seller
 
     function getProceeds(       
-        address seller
     ) external view 
         returns (uint256) 
     {
-        return s_proceeds[seller];
+        return s_proceeds[msg.sender];
     }
 
     // get the set of nft addresses listed for selling in the marketplace

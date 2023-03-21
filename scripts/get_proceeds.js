@@ -13,6 +13,17 @@ async function pullProceeds(signer) {
     return("proceeds: ", tx)
 }
 
+async function viewProceeds(signer) {
+
+    const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, signer)
+
+    console.log("Retrieving proceeds for the signer...")
+    const tx = await mplace_contract.getProceeds()
+
+    return("proceeds: ", tx)
+}
+
 module.exports = {
-    pullProceeds,
+    viewProceeds,
+    pullProceeds
 };
