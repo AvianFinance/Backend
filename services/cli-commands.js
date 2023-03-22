@@ -27,11 +27,11 @@ async function getUserInputText(msgData) {
 
 async function getUserInputFloat(msgData) {
     const response = await prompts({
-        type: 'number',
+        type: 'text',
         name: 'value',
         message: msgData,
         validate: value => {
-        if (isNaN(value) || !Number.isFinite(value)) {
+        if (isNaN(parseFloat(value)) || !Number.isFinite(parseFloat(value))) {
             return 'Please enter a valid floating point number';
         }
         return true;
@@ -39,7 +39,7 @@ async function getUserInputFloat(msgData) {
         float: true
     });
     
-    return response.value;
+    return parseFloat(response.value);
     }
 
 async function getUserInputInt(msgData) {
