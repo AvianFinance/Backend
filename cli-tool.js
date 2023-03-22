@@ -1,5 +1,6 @@
 const {getUserInputFromDropdown} = require('./services/cli-commands')
 const {sexchange_handler} =  require('./faucet_sell')
+const {rexchange_handler} =  require('./faucet_rent')
 
 let runStatus = "Running";
 
@@ -12,11 +13,13 @@ async function main(){
         switch(systemType) {
             case 0:
                 console.log("Welcome to Buy|Sell Exchange");
-                const response = await sexchange_handler()
-                console.log(response);
+                const s_response = await sexchange_handler()
+                console.log(s_response);
                 break;
             case 1:
                 console.log("Welcome to Outright Rental Exchange");
+                const r_response = await rexchange_handler()
+                console.log(r_response);
                 break;
             case 2:
                 console.log("Welcome to Installment based Rental Exchange");
