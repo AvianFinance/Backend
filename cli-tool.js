@@ -1,6 +1,7 @@
 const {getUserInputFromDropdown} = require('./services/cli-commands')
 const {sexchange_handler} =  require('./faucet_sell')
 const {rexchange_handler} =  require('./faucet_rent')
+const {iexchange_handler} = require('./facet_ins')
 
 let runStatus = "Running";
 
@@ -23,6 +24,8 @@ async function main(){
                 break;
             case 2:
                 console.log("Welcome to Installment based Rental Exchange");
+                const i_response = await iexchange_handler()
+                console.log(i_response);
                 break;
             case 3:
                 console.log("Thank you for using Avian Finance for your NFT Tradings !!!")
