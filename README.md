@@ -13,12 +13,11 @@ Follow the below step to generate a working project.
 
             npx hardhat compile
 
-            This should create a folder called artifcats, it will hold the compiled versions of the smart contracts.
+            This should create a folders artifcats (will hold the compiled versions of the smart contracts) and cache.
 
-> Step 04: Go to the faucet.js and run one of the two functions with edits as required via,
+> Step 04: In a terminal opened in the backend directory, run
 
-            node faucet.js
-
+            node cli-tool.js
 
 In case you require to deploy your own version of the smart contract:
 
@@ -32,4 +31,4 @@ In case you require to deploy your own version of the smart contract:
 
 > Step 04 : Deploy the contract to fuji testnet via,
 
-            npx hardhat run deploy/deploy_RimeToken.js 
+            npx hardhat run deploy/<corresponding deploy script> 

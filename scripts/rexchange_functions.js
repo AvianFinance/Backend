@@ -50,7 +50,7 @@ async function cancelRentNFT(tokenId,signer,std) {
     const tx = await mplace_contract.unlistNFT(token_contract.address, tokenId)
 
     await tx.wait(1)
-    console.log("NFT unlisted with token ID: ", tokenId.toString())
+    return("NFT unlisted with token ID: ", tokenId.toString())
 }
 
 async function updateRentNFT(tokenId,amount,signer,std) {
@@ -69,7 +69,7 @@ async function updateRentNFT(tokenId,amount,signer,std) {
     const tx = await mplace_contract.updateNFT(token_contract.address, tokenId, PRICE)
 
     await tx.wait(1)
-    console.log("NFT with token ID, updated: ", tokenId.toString())
+    return("NFT with token ID, updated: ", tokenId.toString())
 }
 
 async function ViewARentListing(tokenId, signer, std) {
@@ -108,17 +108,22 @@ async function ViewRentListedAddrTokens(std,provider) {
     return("Listing data: ", tx)
 }
 
-async function rentNFT(tokenID,signer,std,days,amount) {
+async function rentNFT(tokenID,signer,std,days) {
 
     const standard = await get_standard(std)
     const token_address = standard.addr;
 
     const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, signer)
 
-    let value = days * amount;
-    const price = ethers.utils.parseEther(value.toString())
+    const listing = await mplace_contract.getARListing(token_address, tokenID)
 
-    const txn = await mplace_contract.rentNFT(token_address, tokenID, days, {value: price});
+    const amount = (listing.pricePerDay)*Math.pow(10, -18);
+
+    let price = days * amount;
+
+    const payment = ethers.utils.parseEther(price.toString())
+
+    const txn = await mplace_contract.rentNFT(token_address, tokenID, days, {value: payment});
 
     await txn.wait(1)
     return("NFT Rented!")

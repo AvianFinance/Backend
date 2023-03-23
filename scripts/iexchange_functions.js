@@ -48,7 +48,7 @@ async function unlist_nft(tokenId,signer,std) {
 
     const tx = await mplace_contract.unlistINSNFT(token_contract.address, tokenId)
 
-    console.log("NFT Unlisted")
+    return("NFT Unlisted")
 }
 
 async function rentInsNFT(tokenId,signer,std, numDays) {
@@ -69,7 +69,8 @@ async function rentInsNFT(tokenId,signer,std, numDays) {
     })
 
     await tx.wait(1)
-    console.log("NFT rented and first ins paid")
+
+    return("NFT rented and first ins paid")
 
 }
 
@@ -85,7 +86,7 @@ async function view_installment(tokenId,signer,std,rentaldays) {
 
     const tx = await mplace_contract.getNftInstallment(token_contract.address, tokenId, rentaldays)
 
-    console.log("Next installment : ",tx)
+    return("Next installment : ",tx)
 }
 
 async function payNextIns(tokenId,signer,std) {
@@ -112,7 +113,7 @@ async function payNextIns(tokenId,signer,std) {
     })
 
     await tx.wait(1)
-    console.log("NFT rented and first ins paid")
+    return("Due installment paid !");
 
 }
 
