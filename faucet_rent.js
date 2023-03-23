@@ -44,11 +44,10 @@ async function rexchange_handler(){
             const f_response = await updateRentNFT(f_token_ID,f_price,f_signer,stand)
             return(f_response);
         case 6:
-            const g_days = await getUserInputInt("Input the number of days required (maximum 10)");
-            const g_price = await getUserInputFloat("Input the price in AVAX");
             const g_signer = await get_signer(true);
             const g_token_ID = await getUserInputInt("Input the token id of the nft");
-            const g_response = await rentNFT(g_token_ID,g_signer,stand,g_days,g_price);
+            const g_days = await getUserInputInt("Input the number of days required (maximum 10)");
+            const g_response = await rentNFT(g_token_ID,g_signer,stand,g_days);
             return(g_response);
         default:
             console.log("No Option Selected");
