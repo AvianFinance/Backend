@@ -17,13 +17,11 @@ async function iexchange_handler(){
             const a_price = await getUserInputFloat("Input the price in AVAX");
             const a_response = await ListInsNFT(a_token_ID,a_price,a_signer,stand);
             return(a_response);
-            break;
         case 1:
             const b_signer = await get_signer(true);
             const b_token_ID = await getUserInputInt("Input the token id of the nft");
             const b_response = await unlist_nft(b_token_ID,b_signer,stand)
             return(b_response);
-            break;
         case 2:
             const c_provider = await get_signer(false);
             const c_token_ID = await getUserInputInt("Input the token id of the nft");

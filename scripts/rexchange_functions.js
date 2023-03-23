@@ -50,7 +50,7 @@ async function cancelRentNFT(tokenId,signer,std) {
     const tx = await mplace_contract.unlistNFT(token_contract.address, tokenId)
 
     await tx.wait(1)
-    console.log("NFT unlisted with token ID: ", tokenId.toString())
+    return("NFT unlisted with token ID: ", tokenId.toString())
 }
 
 async function updateRentNFT(tokenId,amount,signer,std) {
@@ -69,7 +69,7 @@ async function updateRentNFT(tokenId,amount,signer,std) {
     const tx = await mplace_contract.updateNFT(token_contract.address, tokenId, PRICE)
 
     await tx.wait(1)
-    console.log("NFT with token ID, updated: ", tokenId.toString())
+    return("NFT with token ID, updated: ", tokenId.toString())
 }
 
 async function ViewARentListing(tokenId, signer, std) {
