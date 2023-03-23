@@ -2,10 +2,15 @@ const {getUserInputFromDropdown} = require('./services/cli-commands')
 const {sexchange_handler} =  require('./faucet_sell')
 const {rexchange_handler} =  require('./faucet_rent')
 const {iexchange_handler} = require('./facet_ins')
+var figlet = require('figlet');
 
 let runStatus = "Running";
 
 async function main(){
+
+    console.log(figlet.textSync('Avian Finance', {
+        whitespaceBreak: true
+    }));
 
     while (runStatus=="Running"){
         console.log("Welcome to Avian Finance Backend Handler")
