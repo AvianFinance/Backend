@@ -52,9 +52,10 @@ contract AIE_Proxy is ReentrancyGuard {
         address indexed nftContract,
         uint256 tokenId,
         uint64 expires,
-        uint64 ins_index,
-        uint256 amountIns,
-        uint256 paidIns
+        uint64 insCount,
+        uint64 insIndex,
+        uint256 insAmount,
+        uint256 totalPaid
     );
 
     event NFTUnlisted(

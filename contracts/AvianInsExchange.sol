@@ -52,9 +52,10 @@ contract AvianInsExchange is ReentrancyGuard {
         address indexed nftContract,
         uint256 tokenId,
         uint64 expires,
-        uint64 ins_index,
-        uint256 amountIns,
-        uint256 paidIns
+        uint64 insCount,
+        uint64 insIndex,
+        uint256 insAmount,
+        uint256 totalPaid
     );
 
     event NFTUnlisted(
@@ -236,6 +237,7 @@ contract AvianInsExchange is ReentrancyGuard {
             nftContract,
             tokenId,
             expires,
+            numDays,
             1,
             firstIns,
             firstIns
@@ -318,6 +320,7 @@ contract AvianInsExchange is ReentrancyGuard {
             nftContract,
             tokenId,
             expires,
+            listing.installmentCount,
             currIndex,
             nextIns,
             totalPaid
