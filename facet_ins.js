@@ -4,7 +4,7 @@ const { ListInsNFT,ViewAInsListing,ViewInsListedAddrs,ViewInsListedAddrTokens,vi
 
 stand = "ERC4907" // token type : set correctly before initiating
 
-const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View all the listed collections', 'View the listed token ids of a collection','Rent a listed NFT','Pay due installments for a rented NFT','View the next installment'];
+const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View all the listed collections', 'View the listed token ids of a collection','Rent a listed NFT','Pay due installments for a rented NFT','View the next installment','Go back'];
 
 async function iexchange_handler(){
 
@@ -52,6 +52,8 @@ async function iexchange_handler(){
             const h_days = await getUserInputInt("Input the number of days required (maximum 10)");
             const h_response = await view_installment(h_token_ID,h_signer,stand,h_days)
             return(h_response);
+        case 8:
+            return("Returning to the main menu");
         default:
             console.log("No Option Selected");
         }

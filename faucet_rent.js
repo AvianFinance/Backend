@@ -4,7 +4,7 @@ const { ListRentNFT, cancelRentNFT, updateRentNFT, ViewARentListing,ViewRentList
 
 stand = "ERC4907" 
 
-const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View all the listed collections', 'View the listed token ids of a collection','Update the price of a listed NFT','Rent a listed NFT'];
+const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View all the listed collections', 'View the listed token ids of a collection','Update the price of a listed NFT','Rent a listed NFT','Go back'];
 
 async function rexchange_handler(){
 
@@ -47,6 +47,8 @@ async function rexchange_handler(){
             const g_days = await getUserInputInt("Input the number of days required (maximum 10)");
             const g_response = await rentNFT(g_token_ID,g_signer,stand,g_days);
             return(g_response);
+        case 7:
+            return("Returning to the main menu");
         default:
             console.log("No Option Selected");
         }

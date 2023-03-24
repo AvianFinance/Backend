@@ -5,7 +5,7 @@ const { ListNFT, cancelListing,UpdateListing, ViewASellListing, ViewSellListedAd
 
 stand = "ERC721" // token type : set correctly before initiating
 
-const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View all the listed collections', 'View the listed token ids of a collection','Update the price of a listed NFT','Buy a listed NFT','View the available proceeds','Obtain the available proceeds'];
+const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View all the listed collections', 'View the listed token ids of a collection','Update the price of a listed NFT','Buy a listed NFT','View the available proceeds','Obtain the available proceeds','Go Back'];
 
 async function sexchange_handler(){
 
@@ -55,6 +55,8 @@ async function sexchange_handler(){
             const i_signer = await get_signer(true);
             const i_response = await pullProceeds(i_signer)
             return(i_response)
+        case 9:
+            return("Returning to the main menu");
         default:
             console.log("No Option Selected");
         }
