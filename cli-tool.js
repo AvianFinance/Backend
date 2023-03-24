@@ -19,18 +19,31 @@ async function main(){
         switch(systemType) {
             case 0:
                 console.log("Welcome to Buy|Sell Exchange");
-                const s_response = await sexchange_handler()
-                console.log(s_response);
+                try{
+                    const s_response = await sexchange_handler()
+                    console.log(s_response);
+                }catch(e){
+                    console.log("Sell Exchange Failed with the error",e);
+                }
                 break;
             case 1:
                 console.log("Welcome to Outright Rental Exchange");
-                const r_response = await rexchange_handler()
-                console.log(r_response);
+                try{
+                    const r_response = await rexchange_handler()
+                    console.log(r_response);
+                }catch(e){
+                    console.log("Rent Exchange Failed with the error",e);
+                }
                 break;
             case 2:
                 console.log("Welcome to Installment based Rental Exchange");
-                const i_response = await iexchange_handler()
-                console.log(i_response);
+                try{
+                    const i_response = await iexchange_handler()
+                    console.log(i_response);
+                }catch(e){
+                    console.log("Installment Exchange Failed with the error",e);
+                }
+
                 break;
             case 3:
                 console.log("Thank you for using Avian Finance for your NFT Tradings !!!")
