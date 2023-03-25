@@ -7,7 +7,7 @@ import "./IRentWrapper.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-contract Wrapper is ERC4907, IWrapper, IERC721Receiver {
+contract RentWrapper is ERC4907, IWrapper, IERC721Receiver {
 
     address internal _generalToken;
 

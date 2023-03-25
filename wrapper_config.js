@@ -1,0 +1,3 @@
+// Movie Stars
+wrapper = "0xe4Eb1af1eCd629992ba50374Ae51120bADcb63ef"
+base = "0xC7fcd3740f662FfF626Cc4Cd804E7115A07F95b7" 
