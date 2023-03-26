@@ -24,6 +24,11 @@
         uint256 sell_price)
 
     emits ItemListed(msg.sender, collection_address, token_id, sell_price)
+
+    Before listing the sell proxy needs to be approved for the corresponding NFT. Can be done via,
+
+    const approvalTx = await nft_contract.approve(sellexchange_contract_address, token_id)
+
 ```
 
 ### Unlisting an already listed NFT to Sell
@@ -135,7 +140,7 @@
         address collection_addres,
         uint256 token_id,
         uint256 price_per_day,
-        { value: listing_fee,}
+        { value: listing_fee, }
     )
 
     emits NFTListed(
@@ -149,7 +154,7 @@
 
     to get the listing fee use : const listingFee = (await mplace_contract.getListingFee()).toString();
 
-    Before listing 
+    Before listing the rent proxy needs to be approved for the corresponding NFT (Logic provided above)
 ```
 
 ### Unlisting an already listed NFT to Sell
@@ -157,12 +162,12 @@
 ```
     Needs to be signed by the owner of the nft
 
-    const tx = await sellexchange_contract.cancelListing(                           
+    const tx = await rentexchange_contract.unlistNFT(                 
         address collection_address, 
         uint256 token_id
     )
 
-    emits ItemCanceled(msg.sender, collection_address, token_id)
+    emits NFTUnlisted(msg.sender,collection_address,token_id);
 ```
 
 ### Updating an existing NFT
@@ -170,47 +175,65 @@
 ```
     Needs to be signed by the owner of the nft
 
-    const tx = await sellexchange_contract.updateListing(
+    const tx = await sellexchange_contract.updateRentNFT(
         address collection_address,
         uint256 token_id,
-        uint256 new_price
+        uint256 price_per_day
     )
 
-    emits ItemListed(msg.sender, collection_address, token_id, new_price)
+    emits NFTListed(
+            owner,
+            user,
+            collection_address,
+            token_id,
+            price_per_day,
+            expiry_time
+        );
 ```
 
-### Buying an existing NFT
+### Renting an existing NFT
 
 ```
     Needs to be signed by the buyer of the nft
 
-    const tx = await sellexchange_contract.buyItem(
-        address collection_address, 
+    const tx = await rentexchange_contract.rentNFT(
+        address collection_address,
         uint256 token_id,
-        { value: price,}
+        uint64 num_days,
+        {value: rental_fee}
     )
 
-    emit ItemBought(msg.sender, collection_address, token_id, price); 
+    emit NFTRented(
+            owner,
+            user,
+            collection_addressract,
+            token_id,
+            expires,
+            rental_fee
+        );
+
+    rental_fee needs to be calculated properly by the implementor, before calling the rentNFT function.
+
 ```
 
-### Viewing a single NFT listing
+### Viewing a single NFT listed for selling
 
 ```
     Not required to sign by the users
 
-    const tx = await sellexchange_contract.getASListing(
+    const tx = await rentexchange_contract.getARListing(
         address collection_address, 
-        uint256 tokenId)
+        uint256 token_id)
 
     returns the corresponding listing structure.
 ```
 
-### Viewing all the NFT collections listed for selling
+### Viewing all the NFT collections listed for renting
 
 ```
     Not required to sign by the users
 
-    const tx = await sellexchange_contract.getSListedAdddresses()
+    const tx = await rentexchange_contract.getRListedAdddresses()
 
     returns all the collection addresses listed for selling.
 ```
@@ -220,7 +243,7 @@
 ```
     Not required to sign by the users
 
-    const tx = await sellexchange_contract.getSListedAdddressTokens(
+    const tx = await rentexchange_contract.getRListedAdddressTokens(
         address collection_address)
 
     returns all the token ids of the given addresses listed for selling.
