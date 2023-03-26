@@ -1,5 +1,5 @@
 const { ethers } = require("hardhat")
-const { iexchange_token } = require('../config')
+const { installment_proxy_addr } = require('../config')
 const fs = require('fs');
 const {get_standard} = require('../services/token_standard')
 
@@ -14,7 +14,7 @@ async function ListInsNFT(tokenId,pricePerDay,signer,std) {
 
     const unitPrice = ethers.utils.parseEther(pricePerDay.toString())
 
-    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(installment_proxy_addr, InsMarketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     console.log("Approving Marketplace as operator of NFT...")
@@ -43,7 +43,7 @@ async function unlist_nft(tokenId,signer,std) {
     const token_address = standard.addr;
     const nft_token = standard.token;
 
-    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(installment_proxy_addr, InsMarketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     const tx = await mplace_contract.unlistINSNFT(token_contract.address, tokenId)
@@ -58,7 +58,7 @@ async function rentInsNFT(tokenId,signer,std, numDays) {
     const token_address = standard.addr;
     const nft_token = standard.token;
 
-    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(installment_proxy_addr, InsMarketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     const firstIns = (await mplace_contract.getNftInstallment(token_contract.address, tokenId, numDays)).toString();
@@ -81,7 +81,7 @@ async function view_installment(tokenId,signer,std,rentaldays) {
     const token_address = standard.addr;
     const nft_token = standard.token;
 
-    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(installment_proxy_addr, InsMarketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     const tx = await mplace_contract.getNftInstallment(token_contract.address, tokenId, rentaldays)
@@ -96,7 +96,7 @@ async function payNextIns(tokenId,signer,std) {
     const token_address = standard.addr;
     const nft_token = standard.token;
 
-    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(installment_proxy_addr, InsMarketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     const numDays = ((await mplace_contract.getAInsListing(token_address, tokenId)).installmentCount).toString();
@@ -122,7 +122,7 @@ async function ViewAInsListing(tokenId, signer, std) {
     const standard = await get_standard(std)
     const token_address = standard.addr;
 
-    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(installment_proxy_addr, InsMarketplace.abi, signer)
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getAInsListing(token_address, tokenId)
@@ -132,7 +132,7 @@ async function ViewAInsListing(tokenId, signer, std) {
 
 async function ViewInsListedAddrs(provider) {
 
-    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, provider)
+    const mplace_contract = new ethers.Contract(installment_proxy_addr, InsMarketplace.abi, provider)
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getInsListedAdddresses() // Gives all the token addresses listed for renting
@@ -145,7 +145,7 @@ async function ViewInsListedAddrTokens(std,provider) {
     const standard = await get_standard(std)
     const token_address = standard.addr;
 
-    const mplace_contract = new ethers.Contract(iexchange_token, InsMarketplace.abi, provider)
+    const mplace_contract = new ethers.Contract(installment_proxy_addr, InsMarketplace.abi, provider)
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getInsListedAdddressTokens(token_address) // when the token address is given gives the token ids listed for renting

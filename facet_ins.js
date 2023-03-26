@@ -1,6 +1,6 @@
 const { get_signer } = require('./services/token_standard')
 const {getUserInputFromDropdown, getUserInputInt, getUserInputFloat} = require('./services/cli-commands')
-const { ListInsNFT,ViewAInsListing,ViewInsListedAddrs,ViewInsListedAddrTokens,view_installment,unlist_nft,rentInsNFT,payNextIns} = require('./scripts/iexchange_functions')
+const { ListInsNFT,ViewAInsListing,ViewInsListedAddrs,ViewInsListedAddrTokens,view_installment,unlist_nft,rentInsNFT,payNextIns} = require('./scripts/installment_functions')
 
 stand = "ERC4907" // token type : set correctly before initiating
 
