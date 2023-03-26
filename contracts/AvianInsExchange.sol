@@ -321,7 +321,7 @@ contract AvianInsExchange is ReentrancyGuard {
             tokenId,
             expires,
             listing.installmentCount,
-            currIndex,
+            nextIndex,
             nextIns,
             totalPaid
         );

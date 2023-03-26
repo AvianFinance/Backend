@@ -153,6 +153,25 @@ async function ViewInsListedAddrTokens(std,provider) {
     return("Listing data: ", tx)
 }
 
+async function ViewImplContract(provider) {
+
+    const mplace_contract = new ethers.Contract(installment_proxy_addr, InsMarketplace.abi, provider)
+
+    console.log("Retrieving NFT listing data...")
+    const tx = await mplace_contract.getImplAddrs() // Get the implementation contract address
+
+    return("Implementation Address: ", tx)
+}
+
+async function UpdateImplContract(new_impl_addr,signer) {
+
+    const mplace_contract = new ethers.Contract(installment_proxy_addr, InsMarketplace.abi, signer)
+
+    const tx = await mplace_contract.updateImplContract(new_impl_addr)
+
+    return("Implementation Updated")
+}
+
 
 
 module.exports = {
@@ -163,5 +182,7 @@ module.exports = {
     view_installment,
     unlist_nft,
     rentInsNFT,
-    payNextIns
+    payNextIns,
+    ViewImplContract,
+    UpdateImplContract
 };

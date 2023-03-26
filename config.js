@@ -1,4 +1,4 @@
-// ins_impl_token = "0xd9Fd615Cc27c6B2FaFd131CC036921347d8d54b3"
+// ins_impl_token = "0x9f513D7299d8B850Bf0fa606E222358ab04cE7b8"
 // ins_proxy_token = "0xFf0867165415bF58dC3498a521761Db8e77B281c"
 
 // rent_impl_token = "0xD946719113666a3E78cc9B9FDEE0aD1a3adEd43b"
