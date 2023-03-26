@@ -152,7 +152,7 @@
             0
         );
 
-    to get the listing fee use : const listingFee = (await mplace_contract.getListingFee()).toString();
+    to get the listing fee use : const listingFee = (await rentexchange_contract.getListingFee()).toString();
 
     Before listing the rent proxy needs to be approved for the corresponding NFT (Logic provided above)
 ```
@@ -235,7 +235,7 @@
 
     const tx = await rentexchange_contract.getRListedAdddresses()
 
-    returns all the collection addresses listed for selling.
+    returns all the collection addresses listed for renting.
 ```
 
 ### Viewing all the token ids of a NFT collections listed for selling
@@ -246,6 +246,141 @@
     const tx = await rentexchange_contract.getRListedAdddressTokens(
         address collection_address)
 
-    returns all the token ids of the given addresses listed for selling.
+    returns all the token ids of the given addresses listed for renting.
+```
+
+## Installment based rental Exchange proxy
+
+```
+    Installment based rental exchange supports and hold all the market data related to renting and lending erc4907 based NFTs via installments.
+```
+
+### Listing a NFT to lend
+
+```
+    Needs to be signed by the owner of the nft
+
+    const tx = await insexchange_contract.listInsBasedNFT(
+        address collection_addres,
+        uint256 token_id,
+        uint256 price_per_day,
+        { value: listing_fee, }
+    )
+
+    emits INSNFTListed(
+            owner,
+            user,
+            collection_addres,
+            token_id,
+            price_per_day
+        );
+
+    to get the listing fee use : const listingFee = (await insexchange_contract.getListingFee()).toString();
+
+    Before listing the rent proxy needs to be approved for the corresponding NFT (Logic provided above)
+```
+
+### Unlisting an already listed NFT to Sell
+
+```
+    Needs to be signed by the owner of the nft
+
+    const tx = await insexchange_contract.unlistINSNFT(                 
+        address collection_address, 
+        uint256 token_id
+    )
+
+    emits NFTUnlisted(msg.sender,collection_address,token_id);
+```
+
+### Renting an existing NFT
+
+```
+    Needs to be signed by the buyer of the nft
+
+    const tx = await insexchange_contract.rentINSNFT(
+        address collection_address,
+        uint256 token_id,
+        uint64 num_days,
+        {value: first_installment}
+    )
+
+    emits NFTINSPaid(
+            owner,
+            user,
+            collection_address,
+            token_id,
+            expires,
+            num_days,
+            1,
+            first_installment,
+            first_installment
+        );
+
+    first_installment needs to be calculated properly by the implementor, before calling the rentNFT function as below,
+
+    const firstIns = (await insexchange_contract.getNftInstallment(collection_address, token_id, num_days)).toString();
+
+```
+
+### Paying the next installment an existing NFT for a rented NFT
+```
+    Needs to be signed by the buyer of the nft
+
+    const tx = await insexchange_contract.payNFTIns(
+        address collection_address,
+        uint256 token_id,
+        {value: next_installment}
+    )
+
+    emits NFTINSPaid(
+            owner,
+            user,
+            collection_address,
+            token_id,
+            expires,
+            num_days,
+            installment_index,
+            this_installment,
+            total_paid
+        );
+
+    next_installment needs to be calculated properly by the implementor, before calling the payNFTIns function as below,
+
+    const nextIns = (await insexchange_contract.getNftInstallment(collection_address, token_id, 0)).toString();
+
+```
+
+### Viewing a single NFT listed for selling
+
+```
+    Not required to sign by the users
+
+    const tx = await insexchange_contract.getAInsListing(
+        address collection_address, 
+        uint256 token_id)
+
+    returns the corresponding listing structure.
+```
+
+### Viewing all the NFT collections listed for renting
+
+```
+    Not required to sign by the users
+
+    const tx = await insexchange_contract.getInsListedAdddresses()
+
+    returns all the collection addresses listed for installment based renting.
+```
+
+### Viewing all the token ids of a NFT collections listed for selling
+
+```
+    Not required to sign by the users
+
+    const tx = await insexchange_contract.getInsListedAdddressTokens(
+        address collection_address)
+
+    returns all the token ids of the given addresses listed for installment based rentings.
 ```
 
