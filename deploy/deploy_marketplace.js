@@ -31,21 +31,23 @@ const fs = require('fs');
 // }
 
 async function main() {  //Create the address for the RimeToken collection
-    const proxy = await hre.ethers.getContractFactory("AIE_Proxy");
+    // const proxy = await hre.ethers.getContractFactory("AIE_Proxy");
     const impl = await hre.ethers.getContractFactory("AvianInsExchange");
 
     const impl_token = await impl.deploy();
     await impl_token.deployed();
 
-    const proxy_token = await proxy.deploy(impl_token.address);
-    await proxy_token.deployed();
+    // const proxy_token = await proxy.deploy(impl_token.address);
+    // await proxy_token.deployed();
 
     console.log("MarketPlace deployed successfully !");
 
-    fs.writeFileSync('./config.js', `
-    impl_token = "${impl_token.address}"
-    proxy_token = "${proxy_token.address}"
-    `)
+    console.log(impl_token.address);
+
+    // fs.writeFileSync('./config.js', `
+    // impl_token = "${impl_token.address}"
+    // proxy_token = "${proxy_token.address}"
+    // `)
 }
 
 main()

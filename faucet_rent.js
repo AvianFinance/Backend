@@ -1,6 +1,6 @@
 const { get_signer } = require('./services/token_standard')
 const {getUserInputFromDropdown, getUserInputInt, getUserInputFloat} = require('./services/cli-commands')
-const { ListRentNFT, cancelRentNFT, updateRentNFT, ViewARentListing,ViewRentListedAddrs, ViewRentListedAddrTokens, rentNFT} = require('./scripts/rexchange_functions')
+const { ListRentNFT, cancelRentNFT, updateRentNFT, ViewARentListing,ViewRentListedAddrs, ViewRentListedAddrTokens, rentNFT} = require('./scripts/rent_functions')
 
 stand = "ERC4907" 
 

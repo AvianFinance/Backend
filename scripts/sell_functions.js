@@ -1,5 +1,5 @@
 const { ethers } = require("hardhat")
-const { sexchange_token } = require('../config')
+const { sell_proxy_addr } = require('../config')
 const fs = require('fs');
 const {get_standard} = require('../services/token_standard')
 
@@ -14,7 +14,7 @@ async function ListNFT(tokenId,amount,signer,std) {
 
     const PRICE = ethers.utils.parseEther(amount.toString())
 
-    const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(sell_proxy_addr, Marketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     console.log("Approving Marketplace as operator of NFT...")
@@ -38,7 +38,7 @@ async function cancelListing(tokenId,signer,std) {
     const standard = await get_standard(std)
     const token_address = standard.addr;
 
-    const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(sell_proxy_addr, Marketplace.abi, signer)
 
     console.log("cancelling the NFT listing...")
     const tx = await mplace_contract.cancelListing(token_address, tokenId)
@@ -55,7 +55,7 @@ async function UpdateListing(tokenId,price,signer,std) {
 
     const PRICE = ethers.utils.parseEther(price.toString())
 
-    const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(sell_proxy_addr, Marketplace.abi, signer)
 
     console.log("Updating the NFT listing...")
     const tx = await mplace_contract.updateListing(token_address, tokenId, PRICE)
@@ -70,7 +70,7 @@ async function ViewASellListing(tokenId, signer, std) {
     const standard = await get_standard(std)
     const token_address = standard.addr;
 
-    const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(sell_proxy_addr, Marketplace.abi, signer)
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getASListing(token_address, tokenId)
@@ -80,7 +80,7 @@ async function ViewASellListing(tokenId, signer, std) {
 
 async function ViewSellListedAddrs(provider) {
 
-    const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, provider)
+    const mplace_contract = new ethers.Contract(sell_proxy_addr, Marketplace.abi, provider)
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getSListedAdddresses() // Gives all the token addresses listed for selling
@@ -93,7 +93,7 @@ async function ViewSellListedAddrTokens(std,provider) {
     const standard = await get_standard(std)
     const token_address = standard.addr;
 
-    const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, provider)
+    const mplace_contract = new ethers.Contract(sell_proxy_addr, Marketplace.abi, provider)
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getSListedAdddressTokens(token_address) // when the token address is given gives the token ids listed for selling
@@ -108,7 +108,7 @@ async function buyNFT(tokenID,signer,std) {
     const token_address = standard.addr;
     const nft_token = standard.token;
 
-    const mplace_contract = new ethers.Contract(sexchange_token, Marketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(sell_proxy_addr, Marketplace.abi, signer)
 
     const listing = await mplace_contract.getASListing(token_address, tokenID)
 

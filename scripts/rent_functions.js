@@ -1,5 +1,5 @@
 const { ethers } = require("hardhat")
-const { rexchange_token } = require('../config')
+const { rent_proxy_addr } = require('../config')
 const fs = require('fs');
 const {get_standard} = require('../services/token_standard')
 
@@ -14,7 +14,7 @@ async function ListRentNFT(tokenId,amount,signer,std) {
 
     const PRICE = ethers.utils.parseEther(amount.toString())
 
-    const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(rent_proxy_addr, Marketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     console.log("Approving Marketplace as operator of NFT...")
@@ -43,7 +43,7 @@ async function cancelRentNFT(tokenId,signer,std) {
     const token_address = standard.addr;
     const nft_token = standard.token;
 
-    const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(rent_proxy_addr, Marketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     console.log("cancelling rent NFT listing...")
@@ -62,7 +62,7 @@ async function updateRentNFT(tokenId,amount,signer,std) {
 
     const PRICE = ethers.utils.parseEther(amount.toString())
 
-    const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(rent_proxy_addr, Marketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     console.log("updating rent NFT listing...")
@@ -77,7 +77,7 @@ async function ViewARentListing(tokenId, signer, std) {
     const standard = await get_standard(std)
     const token_address = standard.addr;
 
-    const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(rent_proxy_addr, Marketplace.abi, signer)
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getARListing(token_address, tokenId)
@@ -87,7 +87,7 @@ async function ViewARentListing(tokenId, signer, std) {
 
 async function ViewRentListedAddrs(provider) {
 
-    const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, provider)
+    const mplace_contract = new ethers.Contract(rent_proxy_addr, Marketplace.abi, provider)
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getRListedAdddresses() // Gives all the token addresses listed for renting
@@ -100,7 +100,7 @@ async function ViewRentListedAddrTokens(std,provider) {
     const standard = await get_standard(std)
     const token_address = standard.addr;
 
-    const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, provider)
+    const mplace_contract = new ethers.Contract(rent_proxy_addr, Marketplace.abi, provider)
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getRListedAdddressTokens(token_address) // when the token address is given gives the token ids listed for renting
@@ -113,7 +113,7 @@ async function rentNFT(tokenID,signer,std,days) {
     const standard = await get_standard(std)
     const token_address = standard.addr;
 
-    const mplace_contract = new ethers.Contract(rexchange_token, Marketplace.abi, signer)
+    const mplace_contract = new ethers.Contract(rent_proxy_addr, Marketplace.abi, signer)
 
     const listing = await mplace_contract.getARListing(token_address, tokenID)
 

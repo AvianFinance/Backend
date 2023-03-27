@@ -1,7 +1,7 @@
 const { get_signer } = require('./services/token_standard')
 const {getUserInputFromDropdown, getUserInputInt, getUserInputFloat} = require('./services/cli-commands')
 const { pullProceeds, viewProceeds } = require('./scripts/get_proceeds')
-const { ListNFT, cancelListing,UpdateListing, ViewASellListing, ViewSellListedAddrs, ViewSellListedAddrTokens, buyNFT} = require('./scripts/sexchange_functions')
+const { ListNFT, cancelListing,UpdateListing, ViewASellListing, ViewSellListedAddrs, ViewSellListedAddrTokens, buyNFT} = require('./scripts/sell_functions')
 
 stand = "ERC721" // token type : set correctly before initiating
 

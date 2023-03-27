@@ -1,10 +1,10 @@
 const { get_signer } = require('./services/token_standard')
-const {getUserInputFromDropdown, getUserInputInt, getUserInputFloat} = require('./services/cli-commands')
-const { ListInsNFT,ViewAInsListing,ViewInsListedAddrs,ViewInsListedAddrTokens,view_installment,unlist_nft,rentInsNFT,payNextIns} = require('./scripts/iexchange_functions')
+const {getUserInputFromDropdown, getUserInputInt, getUserInputFloat, getUserInputText} = require('./services/cli-commands')
+const { ListInsNFT,ViewAInsListing,ViewInsListedAddrs,ViewInsListedAddrTokens,view_installment,unlist_nft,rentInsNFT,payNextIns, ViewImplContract, UpdateImplContract} = require('./scripts/installment_functions')
 
 stand = "ERC4907" // token type : set correctly before initiating
 
-const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View all the listed collections', 'View the listed token ids of a collection','Rent a listed NFT','Pay due installments for a rented NFT','View the next installment','Go back'];
+const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View all the listed collections', 'View the listed token ids of a collection','Rent a listed NFT','Pay due installments for a rented NFT','View the next installment','View the Implementation Address','Update the implementation','Go back'];
 
 async function iexchange_handler(){
 
@@ -53,6 +53,15 @@ async function iexchange_handler(){
             const h_response = await view_installment(h_token_ID,h_signer,stand,h_days)
             return(h_response);
         case 8:
+            const i_signer = await get_signer(false);
+            const i_response = await ViewImplContract(i_signer)
+            return(i_response);
+        case 9:
+            const j_signer = await get_signer(true); 
+            const j_new_impl = await getUserInputText("Input the address of the new implementation contract");
+            const j_response = await UpdateImplContract(j_new_impl,j_signer)
+            return(j_response);
+        case 10:
             return("Returning to the main menu");
         default:
             console.log("No Option Selected");
