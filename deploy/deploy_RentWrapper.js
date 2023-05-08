@@ -13,9 +13,7 @@ async function deploy_rentalWrapper(signer, token_name, token_symbol, collection
 
     console.log("Rentable 4907 Wrapper deployed to:", Wrapper.address, "for the 721 :", collectionToWrap);
 
-    fs.writeFileSync('./wrapper_config.js', `
-    wrapper = "${Wrapper.address}"
-    base = "${collectionToWrap}" `)
+    fs.appendFileSync('./wrapper_config.txt', `${token_symbol}_wrapper=${Wrapper.address}\n`,  "UTF-8",{'flags': 'a+'})
 
     return(Wrapper.address)
 }

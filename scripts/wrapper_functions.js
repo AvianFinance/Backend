@@ -19,7 +19,7 @@ async function DepositNFT(wrapper_address,tokenId,signer) {
     const tx = await wrapper_contract.deposit(tokenId)
 
     await tx.wait(1)
-    console.log("Base NFT Owner is ", token_contract.ownerOf(tokenId))
+    console.log("Base NFT Owner is ", await token_contract.ownerOf(tokenId))
     console.log("NFT deposied with token ID: ", tokenId.toString())
     return("For future tradings please use ", wrapper_address, "with token id :", tokenId.toString())
 }
@@ -35,7 +35,7 @@ async function WithdrawNFT(wrapper_address,tokenId,signer) {
     const tx = await wrapper_contract.withdraw(tokenId)
 
     await tx.wait(1)
-    console.log("Base NFT Owner is ", token_contract.ownerOf(tokenId))
+    console.log("Base NFT Owner is ", await token_contract.ownerOf(tokenId))
     return("For future tradings please use ", base_contract_address, "with token id :", tokenId.toString())
 }
 
