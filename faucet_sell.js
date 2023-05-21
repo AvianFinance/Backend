@@ -13,10 +13,12 @@ async function sexchange_handler(){
 
     switch(systemType) {
         case 0:
+            let start1 = Date.now();
             const a_signer = await get_signer(true);
             const a_token_ID = await getUserInputInt("Input the token id of the nft");
             const a_price = await getUserInputFloat("Input the price in AVAX");
-            const a_response = await ListNFT(a_token_ID,a_price,a_signer,stand);
+            // const standard = await getUserInputFloat("ERC721 0r ERC4907");
+            const a_response = await ListNFT(a_token_ID,a_price,a_signer,'ERC721');
             return(a_response);
         case 1:
             const b_signer = await get_signer(true);
@@ -45,7 +47,7 @@ async function sexchange_handler(){
         case 6:
             const g_signer = await get_signer(true);
             const g_token_ID = await getUserInputInt("Input the token id of the nft");
-            const g_response = await buyNFT(g_token_ID,g_signer,stand) 
+            const g_response = await buyNFT(g_token_ID,g_signer,'ERC721') 
             return(g_response);
         case 7:
             const h_signer = await get_signer(true);

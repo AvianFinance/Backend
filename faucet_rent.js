@@ -45,7 +45,7 @@ async function rexchange_handler(){
             const g_signer = await get_signer(true);
             const g_token_ID = await getUserInputInt("Input the token id of the nft");
             const g_days = await getUserInputInt("Input the number of days required (maximum 10)");
-            const g_response = await rentNFT(g_token_ID,g_signer,stand,g_days);
+            const g_response = await rentNFT(g_token_ID,g_signer,'ERC4907',g_days);
             return(g_response);
         case 7:
             return("Returning to the main menu");

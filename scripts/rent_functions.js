@@ -16,7 +16,8 @@ async function ListRentNFT(tokenId,amount,signer,std) {
 
     const mplace_contract = new ethers.Contract(rent_proxy_addr, Marketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
-
+    
+    let start1 = Date.now();
     console.log("Approving Marketplace as operator of NFT...")
     const approvalTx = await token_contract.approve(mplace_contract.address, tokenId)
     await approvalTx.wait(1)
@@ -28,7 +29,8 @@ async function ListRentNFT(tokenId,amount,signer,std) {
     const tx = await mplace_contract.listNFT(token_contract.address, tokenId, PRICE,{
         value: listingFee,
     })
-
+    let timeTaken1 = Date.now() - start1;
+    console.log("Time taken to list the NFT: ", timeTaken1, "ms")
     await tx.wait(1)
     console.log("NFT Listed with token ID: ", tokenId.toString())
 
@@ -123,8 +125,10 @@ async function rentNFT(tokenID,signer,std,days) {
 
     const payment = ethers.utils.parseEther(price.toString())
 
+    let start1 = Date.now();
     const txn = await mplace_contract.rentNFT(token_address, tokenID, days, {value: payment});
-
+    let timeTaken1 = Date.now() - start1;
+    console.log("Time taken to rent the NFT: ", timeTaken1, "ms")
     await txn.wait(1)
     return("NFT Rented!")
 }

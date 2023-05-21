@@ -1,7 +1,8 @@
 const { ethers } = require("hardhat")
 const { sell_proxy_addr } = require('../config')
 const fs = require('fs');
-const {get_standard} = require('../services/token_standard')
+const {get_standard} = require('../services/token_standard');
+const { concat } = require("ethers/lib/utils");
 
 const Marketplace = JSON.parse(fs.readFileSync('./artifacts/contracts/ASEProxy.sol/ASE_Proxy.json', 'utf-8'))
 
@@ -16,14 +17,19 @@ async function ListNFT(tokenId,amount,signer,std) {
 
     const mplace_contract = new ethers.Contract(sell_proxy_addr, Marketplace.abi, signer)
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
+    console.log(token_contract.address)
+    console.log(mplace_contract.address)
 
+    let start1 = Date.now();
     console.log("Approving Marketplace as operator of NFT...")
     const approvalTx = await token_contract.approve(mplace_contract.address, tokenId)
     await approvalTx.wait(1)
+    console.log(approvalTx)
 
     console.log("Listing NFT...")
     const tx = await mplace_contract.listItem(token_contract.address, tokenId, PRICE)
-
+    let timeTaken1 = Date.now() - start1;
+    console.log("Time taken to list the NFT: ", timeTaken1, "ms")
     await tx.wait(1)
     console.log("NFT Listed with token ID: ", tokenId.toString())
 
@@ -113,9 +119,12 @@ async function buyNFT(tokenID,signer,std) {
     const listing = await mplace_contract.getASListing(token_address, tokenID)
 
     const price = listing.price.toString()
+    let start1 = Date.now();
     const tx = await mplace_contract.buyItem(token_address, tokenID, {
             value: price,
         })
+    let timeTaken1 = Date.now() - start1;
+    console.log("Time taken to buy the NFT: ", timeTaken1, "ms")
     await tx.wait(1)
     return("NFT Bought!")
 }
