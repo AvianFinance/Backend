@@ -85,10 +85,10 @@ contract ASE_Proxy is ReentrancyGuard {
 
     modifier hasNotVoted() {
         if(msg.sender == voter1){
-            require(Proposal.voter1==0, "You have already voted on this proposal");
+            require(pendingContract.voter1==0, "You have already voted on this proposal");
         } 
         if(msg.sender == voter2){
-            require(Proposal.voter2==0, "You have already voted on this proposal");
+            require(pendingContract.voter2==0, "You have already voted on this proposal");
         } 
         _;
     }
@@ -119,10 +119,6 @@ contract ASE_Proxy is ReentrancyGuard {
 
     address private _marketOwner;
 
-    address private voter1;
-
-    address private voter2;
-
     uint256 private _listingFee = .01 ether;
 
     mapping(address => mapping(uint256 => Listing_sell)) private s_listings;   
@@ -131,13 +127,17 @@ contract ASE_Proxy is ReentrancyGuard {
     
     mapping(address => EnumerableSet.UintSet) private s_address_tokens; 
 
-    VotingProposal private Proposal;
-
     EnumerableSet.AddressSet private s_address; 
 
     Counters.Counter private s_listed;
 
     address private impl_sell;
+
+    VotingProposal private pendingContract;
+
+    address private voter1;
+
+    address private voter2;
 
     constructor(address _implContract, address address1, address address2) {
         _marketOwner = msg.sender;
@@ -246,9 +246,9 @@ contract ASE_Proxy is ReentrancyGuard {
     ) external 
         isOwnerContract(msg.sender) 
     {
-        Proposal.contractAddress = cAddress;
-        Proposal.voter1 = 0;
-        Proposal.voter2 = 0;
+        pendingContract.contractAddress = cAddress;
+        pendingContract.voter1 = 0;
+        pendingContract.voter2 = 0;
     }
 
     function voteOnProposal(
@@ -260,15 +260,15 @@ contract ASE_Proxy is ReentrancyGuard {
 
         if (supportChanges) {
             if (msg.sender == voter1) {
-                Proposal.voter1 = 2;
+                pendingContract.voter1 = 2;
             } else {
-                Proposal.voter2 = 2;
+                pendingContract.voter2 = 2;
             }
         } else {
             if (msg.sender == voter1) {
-                Proposal.voter1 = 1;
+                pendingContract.voter1 = 1;
             } else {
-                Proposal.voter2 = 1;
+                pendingContract.voter2 = 1;
             }
         }
     }
@@ -277,13 +277,13 @@ contract ASE_Proxy is ReentrancyGuard {
         view 
         returns (uint256) 
     {
-        uint256 totalVotes = Proposal.voter1 + Proposal.voter2;
+        uint256 totalVotes = pendingContract.voter1 + pendingContract.voter2;
 
         if (totalVotes == 0) {
             return 0; // Proposal has no votes
-        } else if (Proposal.voter1 == 1 && Proposal.voter2 == 1) {
+        } else if (pendingContract.voter1 == 1 && pendingContract.voter2 == 1) {
             return 0; // Proposal is authorized
-        } else if (Proposal.voter1 == 2 && Proposal.voter2 == 2) {
+        } else if (pendingContract.voter1 == 2 && pendingContract.voter2 == 2) {
             return 2; // Proposal is not authorized
         } else {
             return 1; // Voting result is inconclusive
@@ -308,10 +308,10 @@ contract ASE_Proxy is ReentrancyGuard {
         nonReentrant
     {
         require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
-        require(Proposal.voter1 != 0 || Proposal.voter2 != 0, "Voters have not completed voting");
-        require(Proposal.voter1 ==2 && Proposal.voter2 == 2, "Voters have not agreed on the proposal");
+        require(pendingContract.voter1 != 0 || pendingContract.voter2 != 0, "Voters have not completed voting");
+        require(pendingContract.voter1 ==2 && pendingContract.voter2 == 2, "Voters have not agreed on the proposal");
         
-        impl_sell = Proposal.contractAddress;
+        impl_sell = pendingContract.contractAddress;
         emit ImplUpgrade(
             _marketOwner,
             impl_sell
