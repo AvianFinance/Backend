@@ -31,6 +31,12 @@ contract ASE_Proxy is ReentrancyGuard {
         uint256 price;
     }
 
+    struct VotingProposal {
+        address contractAddress;
+        uint256 voter1;
+        uint256 voter2;
+    }
+
     event ItemListed(
         address indexed seller,
         address indexed nftAddress,
@@ -94,6 +100,10 @@ contract ASE_Proxy is ReentrancyGuard {
 
     address private _marketOwner;
 
+    address private voter1;
+
+    address private voter2;
+
     uint256 private _listingFee = .01 ether;
 
     mapping(address => mapping(uint256 => Listing_sell)) private s_listings;   
@@ -102,15 +112,21 @@ contract ASE_Proxy is ReentrancyGuard {
     
     mapping(address => EnumerableSet.UintSet) private s_address_tokens; 
 
+    mapping(address => VotingProposal) private votingProposals;
+
+    mapping(address => mapping(address => bool)) private hasVoted;
+
     EnumerableSet.AddressSet private s_address; 
 
     Counters.Counter private s_listed;
 
     address private impl_sell;
 
-    constructor(address _implContract) {
+    constructor(address _implContract, address address1, address address2) {
         _marketOwner = msg.sender;
         impl_sell = _implContract;
+        voter1 = address1;
+        voter2 = address2;
     }
 
     // Listing Functionality
@@ -208,6 +224,63 @@ contract ASE_Proxy is ReentrancyGuard {
         return tokens;
     }
 
+    function createVotingProposal(
+        address contractAddress
+    ) external 
+        isOwner(msg.sender) 
+    {
+        VotingProposal memory newProposal = VotingProposal(
+            contractAddress,
+            0,
+            0
+        );
+        votingProposals[contractAddress] = newProposal;
+    }
+
+    function voteOnProposal(
+        address contractAddress, 
+        bool supportChanges
+    ) external 
+        hasNotVoted(contractAddress) {
+
+        VotingProposal storage proposal = votingProposals[contractAddress];
+        require((msg.sender != voter1 || msg.sender != voter2), "Not authorized to vote");
+
+        if (supportChanges) {
+            if (msg.sender == voter1) {
+                proposal.voter1 = 1;
+            } else {
+                proposal.voter2 = 1;
+            }
+        } else {
+            if (msg.sender == voter1) {
+                proposal.voter1 = 2;
+            } else {
+                proposal.voter2 = 2;
+            }
+        }
+        hasVoted[msg.sender][contractAddress] = true;
+    }
+
+    function calculateVotingResult(
+        address contractAddress
+    ) public 
+        view 
+        returns (uint256) {
+        VotingProposal memory proposal = votingProposals[contractAddress];
+        uint256 totalVotes = proposal.voter1 + proposal.voter2;
+
+        if (totalVotes == 0) {
+            return 0; // Proposal has no votes
+        } else if (proposal.voter1 == 1 && proposal.voter2 == 1) {
+            return 0; // Proposal is authorized
+        } else if (proposal.voter1 == 2 && proposal.voter2 == 2) {
+            return 2; // Proposal is not authorized
+        } else {
+            return 1; // Voting result is inconclusive
+        }
+    }
+
     // function to check whether a given token is 721 or not
 
     function isNFT(address nftContract) public view returns (bool) {
@@ -228,6 +301,9 @@ contract ASE_Proxy is ReentrancyGuard {
         nonReentrant
     {
         require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
+        require(proposal.voter1 == 0 && proposal.voter2 == 0, "Voters have not completed voting");
+        require(proposal.voter1 <=2 && proposal.voter2 <= 2, "Voters have not agreed on the proposal");
+        
         impl_sell = newImplAddrs;
         emit ImplUpgrade(
             _marketOwner,

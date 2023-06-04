@@ -1,94 +1,101 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+error NotOwner();
 
-contract FunctionVoting is Ownable {
+contract FunctionVoting {
     struct VotingProposal {
-        uint256 proposalId;
-        address functionAddress;
-        string proposedChanges;
-        uint256 votingStart;
-        uint256 votingEnd;
-        uint256 forVotes;
-        uint256 againstVotes;
-        bool isAuthorized;
+        address contractAddress;
+        uint256 voter1;
+        uint256 voter2;
     }
 
-    uint256 private proposalIdCounter;
-    mapping(uint256 => VotingProposal) private votingProposals;
-    mapping(address => mapping(uint256 => bool)) private hasVoted;
+    mapping(address => VotingProposal) private votingProposals;
+    mapping(address => mapping(address => bool)) private hasVoted;
 
-    modifier hasNotVoted(uint256 proposalId) {
-        require(!hasVoted[msg.sender][proposalId], "You have already voted on this proposal");
+    address private _marketOwner;
+    address private voter1;
+    address private voter2;
+    
+    modifier hasNotVoted(address contractAddress) {
+        require(!hasVoted[msg.sender][contractAddress], "You have already voted on this proposal");
         _;
     }
 
-    modifier onlyAuthorized(uint256 proposalId) {
-        require(votingProposals[proposalId].isAuthorized, "Function change is not authorized");
+    modifier isOwner(
+        address owneraddess
+    ) {
+        if (_marketOwner != owneraddess) {
+            revert NotOwner();
+        }
         _;
     }
 
-    function createVotingProposal(address functionAddress, string memory proposedChanges, uint256 votingDuration) external onlyOwner returns (uint256) {
-        uint256 newProposalId = proposalIdCounter++;
-        uint256 votingStart = block.timestamp;
-        uint256 votingEnd = votingStart + votingDuration;
+    // modifier onlyAuthorized(uint256 proposalId) {
+    //     require(votingProposals[proposalId].isAuthorized, "Function change is not authorized");
+    //     _;
+    // }
+
+    constructor(address address1, address address2) {
+        _marketOwner = msg.sender;
+        voter1 = address1;
+        voter2 = address2;
+    }
+
+    function createVotingProposal(
+        address contractAddress
+    ) external 
+        isOwner(msg.sender) {
 
         VotingProposal memory newProposal = VotingProposal(
-            newProposalId,
-            functionAddress,
-            proposedChanges,
-            votingStart,
-            votingEnd,
+            contractAddress,
             0,
-            0,
-            false
+            0
         );
-
-        votingProposals[newProposalId] = newProposal;
-
-        return newProposalId;
+        votingProposals[contractAddress] = newProposal;
     }
 
-    function voteOnProposal(uint256 proposalId, bool supportChanges) external hasNotVoted(proposalId) {
-        VotingProposal storage proposal = votingProposals[proposalId];
-        require(block.timestamp >= proposal.votingStart && block.timestamp <= proposal.votingEnd, "Voting period has ended");
+    function voteOnProposal(
+        address contractAddress, 
+        bool supportChanges
+    ) external 
+        hasNotVoted(contractAddress) {
+
+        VotingProposal storage proposal = votingProposals[contractAddress];
+        require((msg.sender != voter1 || msg.sender != voter2), "Not authorized to vote");
 
         if (supportChanges) {
-            proposal.forVotes++;
+            if (msg.sender == voter1) {
+                proposal.voter1 = 1;
+            } else {
+                proposal.voter2 = 1;
+            }
         } else {
-            proposal.againstVotes++;
+            if (msg.sender == voter1) {
+                proposal.voter1 = 2;
+            } else {
+                proposal.voter2 = 2;
+            }
         }
-
-        hasVoted[msg.sender][proposalId] = true;
+        hasVoted[msg.sender][contractAddress] = true;
     }
 
-    function calculateVotingResult(uint256 proposalId) public view returns (bool) {
-        VotingProposal memory proposal = votingProposals[proposalId];
-        uint256 totalVotes = proposal.forVotes + proposal.againstVotes;
+    function calculateVotingResult(
+        address contractAddress
+    ) public 
+        view 
+        returns (uint256) {
+        VotingProposal memory proposal = votingProposals[contractAddress];
+        uint256 totalVotes = proposal.voter1 + proposal.voter2;
 
         if (totalVotes == 0) {
-            return false; // Proposal has no votes
-        }
-
-        uint256 majorityThreshold = totalVotes / 2 + 1;
-
-        if (proposal.forVotes >= majorityThreshold) {
-            return true; // Proposal is authorized
-        } else if (proposal.againstVotes >= majorityThreshold) {
-            return false; // Proposal is not authorized
+            return 0; // Proposal has no votes
+        } else if (proposal.voter1 == 1 && proposal.voter2 == 1) {
+            return 0; // Proposal is authorized
+        } else if (proposal.voter1 == 2 && proposal.voter2 == 2) {
+            return 2; // Proposal is not authorized
         } else {
-            return false; // Voting result is inconclusive
+            return 1; // Voting result is inconclusive
         }
-    }
-
-    function authorizeFunctionChange(uint256 proposalId) external onlyOwner {
-        bool result = calculateVotingResult(proposalId);
-        votingProposals[proposalId].isAuthorized = result;
-    }
-
-    // Example function secured by the voting system
-    function exampleFunction() external onlyAuthorized(proposalId) {
-        // Function logic here
     }
 }
