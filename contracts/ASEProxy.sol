@@ -83,6 +83,12 @@ contract ASE_Proxy is ReentrancyGuard {
         _;
     }
 
+    modifier hasNotVoted(address contractAddress) {
+        require(!hasVoted[msg.sender][contractAddress], "You have already voted on this proposal");
+        _;
+    }
+
+
     modifier isOwner(
         address nftAddress,
         uint256 tokenId,
@@ -303,7 +309,7 @@ contract ASE_Proxy is ReentrancyGuard {
         require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
         require(proposal.voter1 == 0 && proposal.voter2 == 0, "Voters have not completed voting");
         require(proposal.voter1 <=2 && proposal.voter2 <= 2, "Voters have not agreed on the proposal");
-        
+
         impl_sell = newImplAddrs;
         emit ImplUpgrade(
             _marketOwner,
