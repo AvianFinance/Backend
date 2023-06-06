@@ -31,18 +31,20 @@ const fs = require('fs');
 // }
 
 async function main() {  //Create the address for the RimeToken collection
-    // const proxy = await hre.ethers.getContractFactory("AIE_Proxy");
-    const impl = await hre.ethers.getContractFactory("AvianInsExchange");
+    const proxy = await hre.ethers.getContractFactory("ASE_Proxy");
+    const impl = await hre.ethers.getContractFactory("AvianSellExchange");
 
     const impl_token = await impl.deploy();
     await impl_token.deployed();
 
-    // const proxy_token = await proxy.deploy(impl_token.address);
-    // await proxy_token.deployed();
+    const proxy_token = await proxy.deploy(impl_token.address,"0xCD5729c9B2963FaaeaDAABBE2a402bC374D70547","0x741921be0fbc23789724eb8D8C7e11e877a3dCfC");
+    await proxy_token.deployed();
 
     console.log("MarketPlace deployed successfully !");
 
-    console.log(impl_token.address);
+    console.log("logic",impl_token.address);
+
+    console.log("proxy",proxy_token.address)
 
     // fs.writeFileSync('./config.js', `
     // impl_token = "${impl_token.address}"

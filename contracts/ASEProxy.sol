@@ -31,6 +31,12 @@ contract ASE_Proxy is ReentrancyGuard {
         uint256 price;
     }
 
+    struct VotingProposal {
+        address contractAddress;
+        uint256 voter1;
+        uint256 voter2;
+    }
+
     event ItemListed(
         address indexed seller,
         address indexed nftAddress,
@@ -77,6 +83,16 @@ contract ASE_Proxy is ReentrancyGuard {
         _;
     }
 
+    modifier hasNotVoted() {
+        if(msg.sender == voter1){
+            require(pendingContract.voter1==0, "You have already voted on this proposal");
+        } 
+        if(msg.sender == voter2){
+            require(pendingContract.voter2==0, "You have already voted on this proposal");
+        } 
+        _;
+    }
+
     modifier isOwner(
         address nftAddress,
         uint256 tokenId,
@@ -85,6 +101,15 @@ contract ASE_Proxy is ReentrancyGuard {
         IERC721 nft = IERC721(nftAddress);
         address owner = nft.ownerOf(tokenId);
         if (spender != owner) {
+            revert NotOwner();
+        }
+        _;
+    }
+
+    modifier isOwnerContract(
+        address owneraddess
+    ) {
+        if (_marketOwner != owneraddess) {
             revert NotOwner();
         }
         _;
@@ -108,9 +133,17 @@ contract ASE_Proxy is ReentrancyGuard {
 
     address private impl_sell;
 
-    constructor(address _implContract) {
+    VotingProposal private pendingContract;
+
+    address private voter1;
+
+    address private voter2;
+
+    constructor(address _implContract, address address1, address address2) {
         _marketOwner = msg.sender;
         impl_sell = _implContract;
+        voter1 = address1;
+        voter2 = address2;
     }
 
     // Listing Functionality
@@ -208,6 +241,55 @@ contract ASE_Proxy is ReentrancyGuard {
         return tokens;
     }
 
+    function createVotingProposal(
+        address cAddress
+    ) external 
+        isOwnerContract(msg.sender) 
+    {
+        pendingContract.contractAddress = cAddress;
+        pendingContract.voter1 = 0;
+        pendingContract.voter2 = 0;
+    }
+
+    function voteOnProposal(
+        bool supportChanges
+    ) external 
+        hasNotVoted() 
+    {
+        require((msg.sender == voter1 || msg.sender == voter2), "Not authorized to vote");
+
+        if (supportChanges) {
+            if (msg.sender == voter1) {
+                pendingContract.voter1 = 2;
+            } else {
+                pendingContract.voter2 = 2;
+            }
+        } else {
+            if (msg.sender == voter1) {
+                pendingContract.voter1 = 1;
+            } else {
+                pendingContract.voter2 = 1;
+            }
+        }
+    }
+
+    function calculateVotingResult() public 
+        view 
+        returns (uint256) 
+    {
+        uint256 totalVotes = pendingContract.voter1 + pendingContract.voter2;
+
+        if (totalVotes == 0) {
+            return 0; // Proposal has no votes
+        } else if (pendingContract.voter1 == 1 && pendingContract.voter2 == 1) {
+            return 0; // Proposal is authorized
+        } else if (pendingContract.voter1 == 2 && pendingContract.voter2 == 2) {
+            return 2; // Proposal is not authorized
+        } else {
+            return 1; // Voting result is inconclusive
+        }
+    }
+
     // function to check whether a given token is 721 or not
 
     function isNFT(address nftContract) public view returns (bool) {
@@ -222,13 +304,14 @@ contract ASE_Proxy is ReentrancyGuard {
     }
     // upgrade functionality
 
-    function updateImplContract(
-        address newImplAddrs
-    ) external
+    function updateImplContract() external
         nonReentrant
     {
         require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
-        impl_sell = newImplAddrs;
+        require(pendingContract.voter1 != 0 || pendingContract.voter2 != 0, "Voters have not completed voting");
+        require(pendingContract.voter1 ==2 && pendingContract.voter2 == 2, "Voters have not agreed on the proposal");
+        
+        impl_sell = pendingContract.contractAddress;
         emit ImplUpgrade(
             _marketOwner,
             impl_sell
