@@ -33,8 +33,8 @@ contract ASE_Proxy is ReentrancyGuard {
 
     struct VotingProposal {
         address contractAddress;
-        uint256 voter1;
-        uint256 voter2;
+        uint8 voter1;
+        uint8 voter2;
     }
 
     event ItemListed(
@@ -83,16 +83,6 @@ contract ASE_Proxy is ReentrancyGuard {
         _;
     }
 
-    modifier hasNotVoted() {
-        if(msg.sender == voter1){
-            require(pendingContract.voter1==0, "You have already voted on this proposal");
-        } 
-        if(msg.sender == voter2){
-            require(pendingContract.voter2==0, "You have already voted on this proposal");
-        } 
-        _;
-    }
-
     modifier isOwner(
         address nftAddress,
         uint256 tokenId,
@@ -101,15 +91,6 @@ contract ASE_Proxy is ReentrancyGuard {
         IERC721 nft = IERC721(nftAddress);
         address owner = nft.ownerOf(tokenId);
         if (spender != owner) {
-            revert NotOwner();
-        }
-        _;
-    }
-
-    modifier isOwnerContract(
-        address owneraddess
-    ) {
-        if (_marketOwner != owneraddess) {
             revert NotOwner();
         }
         _;
@@ -243,53 +224,68 @@ contract ASE_Proxy is ReentrancyGuard {
 
     function createVotingProposal(
         address cAddress
-    ) external 
-        isOwnerContract(msg.sender) 
+    ) external
+    
     {
+        require((msg.sender == _marketOwner), "You are not the market owner");
+        require(pendingContract.voter1 != 0 && pendingContract.voter2 != 0, "Voters have not completed voting");
+
         pendingContract.contractAddress = cAddress;
         pendingContract.voter1 = 0;
         pendingContract.voter2 = 0;
     }
 
-    function voteOnProposal(
-        bool supportChanges
-    ) external 
-        hasNotVoted() 
+    function voteOnProposal(bool supportChanges) external 
     {
         require((msg.sender == voter1 || msg.sender == voter2), "Not authorized to vote");
 
-        if (supportChanges) {
-            if (msg.sender == voter1) {
-                pendingContract.voter1 = 2;
-            } else {
-                pendingContract.voter2 = 2;
-            }
+        if (msg.sender == voter1) {
+            require(pendingContract.voter1==0, "You have already voted on this proposal");
+            pendingContract.voter1 = getResult(supportChanges);
         } else {
-            if (msg.sender == voter1) {
-                pendingContract.voter1 = 1;
-            } else {
-                pendingContract.voter2 = 1;
-            }
+            require(pendingContract.voter2==0, "You have already voted on this proposal");
+            pendingContract.voter2 = getResult(supportChanges);
+        }
+
+    }
+
+    function getResult(bool input) internal pure returns (uint8) {
+        if (input) {
+            return 2;
+        } else {
+            return 1;
         }
     }
 
-    function calculateVotingResult() public 
+    function isProposalApproved() public 
         view 
-        returns (uint256) 
+        returns (bool) 
     {
-        uint256 totalVotes = pendingContract.voter1 + pendingContract.voter2;
+        uint8 totalVotes = pendingContract.voter1 + pendingContract.voter2;
 
-        if (totalVotes == 0) {
-            return 0; // Proposal has no votes
-        } else if (pendingContract.voter1 == 1 && pendingContract.voter2 == 1) {
-            return 0; // Proposal is authorized
-        } else if (pendingContract.voter1 == 2 && pendingContract.voter2 == 2) {
-            return 2; // Proposal is not authorized
+        if (totalVotes == 4) {
+            return true;
         } else {
-            return 1; // Voting result is inconclusive
+            return false;
         }
     }
 
+    // upgrade functionality
+
+    function updateImplContract() external
+        nonReentrant
+    {
+        require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
+        require(pendingContract.voter1 != 0 && pendingContract.voter2 != 0, "Voters have not completed voting");
+        require(pendingContract.voter1 ==2 && pendingContract.voter2 == 2, "Voters have not agreed on the proposal");
+        
+        impl_sell = pendingContract.contractAddress;
+
+        emit ImplUpgrade(
+            _marketOwner,
+            impl_sell
+        );
+    }
     // function to check whether a given token is 721 or not
 
     function isNFT(address nftContract) public view returns (bool) {
@@ -301,21 +297,6 @@ contract ASE_Proxy is ReentrancyGuard {
             return false;
         }
         return _isNFT;
-    }
-    // upgrade functionality
-
-    function updateImplContract() external
-        nonReentrant
-    {
-        require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
-        require(pendingContract.voter1 != 0 && pendingContract.voter2 != 0, "Voters have not completed voting");
-        require(pendingContract.voter1 ==2 && pendingContract.voter2 == 2, "Voters have not agreed on the proposal");
-        
-        impl_sell = pendingContract.contractAddress;
-        emit ImplUpgrade(
-            _marketOwner,
-            impl_sell
-        );
     }
 
     function getImplAddrs(
