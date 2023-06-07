@@ -112,6 +112,15 @@ contract ARE_Proxy is ReentrancyGuard {
         _;
     }
 
+    modifier isOwnerContract(
+        address owneraddess
+    ) {
+        if (_marketOwner != owneraddess) {
+            revert NotOwner();
+        }
+        _;
+    }
+
     // State Variables for the proxy
 
     address private _marketOwner;
