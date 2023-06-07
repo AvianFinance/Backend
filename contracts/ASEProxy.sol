@@ -308,7 +308,7 @@ contract ASE_Proxy is ReentrancyGuard {
         nonReentrant
     {
         require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
-        require(pendingContract.voter1 != 0 || pendingContract.voter2 != 0, "Voters have not completed voting");
+        require(pendingContract.voter1 != 0 && pendingContract.voter2 != 0, "Voters have not completed voting");
         require(pendingContract.voter1 ==2 && pendingContract.voter2 == 2, "Voters have not agreed on the proposal");
         
         impl_sell = pendingContract.contractAddress;

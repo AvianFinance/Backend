@@ -36,6 +36,12 @@ contract AIE_Proxy is ReentrancyGuard {
         uint256 paidIns;
     }
 
+    struct VotingProposal {
+        address contractAddress;
+        uint256 voter1;
+        uint256 voter2;
+    }
+
     // events for nft rentals
 
     event INSNFTListed(
@@ -90,6 +96,16 @@ contract AIE_Proxy is ReentrancyGuard {
         _;
     }
 
+    modifier hasNotVoted() {
+        if(msg.sender == voter1){
+            require(pendingContract.voter1==0, "You have already voted on this proposal");
+        } 
+        if(msg.sender == voter2){
+            require(pendingContract.voter2==0, "You have already voted on this proposal");
+        } 
+        _;
+    }
+
     modifier isOwner(
         address nftAddress,
         uint256 tokenId,
@@ -121,9 +137,17 @@ contract AIE_Proxy is ReentrancyGuard {
 
     address private impl_installment;
 
-    constructor(address _implContract) {
+    VotingProposal private pendingContract;
+
+    address private voter1;
+
+    address private voter2;
+
+    constructor(address _implContract, address address1, address address2) {
         _marketOwner = msg.sender;
         impl_installment = _implContract;
+        voter1 = address1;
+        voter2 = address2;
     }
 
     // listing functionality
@@ -250,6 +274,55 @@ contract AIE_Proxy is ReentrancyGuard {
         return _isRentable && _isNFT;
     }
 
+    function createVotingProposal(
+        address cAddress
+    ) external 
+        isOwnerContract(msg.sender) 
+    {
+        pendingContract.contractAddress = cAddress;
+        pendingContract.voter1 = 0;
+        pendingContract.voter2 = 0;
+    }
+
+    function voteOnProposal(
+        bool supportChanges
+    ) external 
+        hasNotVoted() 
+    {
+        require((msg.sender == voter1 || msg.sender == voter2), "Not authorized to vote");
+
+        if (supportChanges) {
+            if (msg.sender == voter1) {
+                pendingContract.voter1 = 2;
+            } else {
+                pendingContract.voter2 = 2;
+            }
+        } else {
+            if (msg.sender == voter1) {
+                pendingContract.voter1 = 1;
+            } else {
+                pendingContract.voter2 = 1;
+            }
+        }
+    }
+
+    function calculateVotingResult() public 
+        view 
+        returns (uint256) 
+    {
+        uint256 totalVotes = pendingContract.voter1 + pendingContract.voter2;
+
+        if (totalVotes == 0) {
+            return 0; // Proposal has no votes
+        } else if (pendingContract.voter1 == 1 && pendingContract.voter2 == 1) {
+            return 0; // Proposal is authorized
+        } else if (pendingContract.voter1 == 2 && pendingContract.voter2 == 2) {
+            return 2; // Proposal is not authorized
+        } else {
+            return 1; // Voting result is inconclusive
+        }
+    }
+
     function isNFT(address nftContract) public view returns (bool) {
         bool _isNFT = false;
 
@@ -263,13 +336,14 @@ contract AIE_Proxy is ReentrancyGuard {
 
     // Implementation upgrade logic
 
-    function updateImplContract(
-        address newImplAddrs
-    ) external
+    function updateImplContract() external
         nonReentrant
     {
         require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
-        impl_installment = newImplAddrs;
+        require(pendingContract.voter1 != 0 && pendingContract.voter2 != 0, "Voters have not completed voting");
+        require(pendingContract.voter1 ==2 && pendingContract.voter2 == 2, "Voters have not agreed on the proposal");
+        
+        impl_installment = pendingContract.contractAddress;
         emit ImplUpgrade(
             _marketOwner,
             impl_installment
