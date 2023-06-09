@@ -220,7 +220,7 @@ contract AvianRentExchange is ReentrancyGuard {
     // rental functionality
 
     function rentNFT(
-        address nftContract,
+        address nftAddress,
         uint256 tokenId,
         uint64 numDays
     ) external payable 
@@ -228,10 +228,10 @@ contract AvianRentExchange is ReentrancyGuard {
     returns(string memory) {
         require(numDays <= _maxInstallments, "Maximum of 10 rental days are allowed");
 
-        Listing_rent storage listing = r_listings[nftContract][tokenId];
+        Listing_rent storage listing = r_listings[nftAddress][tokenId];
         require(listing.user == address(0) || block.timestamp > listing.expires, "NFT already rented");
 
-        IERC721 nft = IERC721(nftContract);
+        IERC721 nft = IERC721(nftAddress);
         if (nft.getApproved(tokenId) != address(this)) {
             revert NotApprovedForMarketplace();
         }
@@ -243,14 +243,21 @@ contract AvianRentExchange is ReentrancyGuard {
         payable(listing.owner).transfer(rentalFee);
 
         // Update listing
-        IERC4907(nftContract).setUser(tokenId, msg.sender, expires);
+        IERC4907(nftAddress).setUser(tokenId, msg.sender, expires);
         listing.user = msg.sender;
         listing.expires = expires;
 
+        EnumerableSet.remove(r_address_tokens[nftAddress], tokenId);
+        delete r_listings[nftAddress][tokenId];
+        if (EnumerableSet.length(r_address_tokens[nftAddress]) == 0) {
+            EnumerableSet.remove(r_address, nftAddress);
+        }
+        r_listed.decrement();
+
         emit NFTRented(
-            IERC721(nftContract).ownerOf(tokenId),
+            IERC721(nftAddress).ownerOf(tokenId),
             msg.sender,
-            nftContract,
+            nftAddress,
             tokenId,
             expires,
             rentalFee
