@@ -96,9 +96,18 @@ contract ASE_Proxy is ReentrancyGuard {
         _;
     }
 
+    modifier isMarketOwner(
+        address ownerAddess
+    ) {
+        if (marketOwner != ownerAddess) {
+            revert NotOwner();
+        }
+        _;
+    }
+
     // State Variables for the proxy
 
-    address private _marketOwner;
+    address private marketOwner;
 
     uint256 private _listingFee = .01 ether;
 
@@ -110,8 +119,6 @@ contract ASE_Proxy is ReentrancyGuard {
 
     EnumerableSet.AddressSet private s_address; 
 
-    Counters.Counter private s_listed;
-
     address private impl_sell;
 
     VotingProposal private pendingContract;
@@ -120,9 +127,9 @@ contract ASE_Proxy is ReentrancyGuard {
 
     address private voter2;
 
-    constructor(address _implContract, address address1, address address2) {
-        _marketOwner = msg.sender;
-        impl_sell = _implContract;
+    constructor(address implContract, address address1, address address2) {
+        marketOwner = msg.sender;
+        impl_sell = implContract;
         voter1 = address1;
         voter2 = address2;
     }
@@ -224,12 +231,9 @@ contract ASE_Proxy is ReentrancyGuard {
 
     function createVotingProposal(
         address cAddress
-    ) external
-    
+    ) external 
+        isMarketOwner(msg.sender) 
     {
-        require((msg.sender == _marketOwner), "You are not the market owner");
-        require(pendingContract.voter1 != 0 && pendingContract.voter2 != 0, "Voters have not completed voting");
-
         pendingContract.contractAddress = cAddress;
         pendingContract.voter1 = 0;
         pendingContract.voter2 = 0;
@@ -257,10 +261,7 @@ contract ASE_Proxy is ReentrancyGuard {
         }
     }
 
-    function isProposalApproved() public 
-        view 
-        returns (bool) 
-    {
+    function isProposalApproved() public view returns (bool) {
         uint8 totalVotes = pendingContract.voter1 + pendingContract.voter2;
 
         if (totalVotes == 4) {
@@ -274,15 +275,15 @@ contract ASE_Proxy is ReentrancyGuard {
 
     function updateImplContract() external
         nonReentrant
+        isMarketOwner(msg.sender) 
     {
-        require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
         require(pendingContract.voter1 != 0 && pendingContract.voter2 != 0, "Voters have not completed voting");
         require(pendingContract.voter1 ==2 && pendingContract.voter2 == 2, "Voters have not agreed on the proposal");
         
         impl_sell = pendingContract.contractAddress;
 
         emit ImplUpgrade(
-            _marketOwner,
+            marketOwner,
             impl_sell
         );
     }

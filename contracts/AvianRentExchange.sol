@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/interfaces/IERC721.sol";
 import "./IERC4907.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 error PriceNotMet(address nftAddress, uint256 tokenId, uint256 price);
 error ItemNotForSale(address nftAddress, uint256 tokenId);
@@ -17,10 +16,8 @@ error NotOwner();
 error NotApprovedForMarketplace();
 error PriceMustBeAboveZero();
 
-
 contract AvianRentExchange is ReentrancyGuard {
 
-    using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -93,7 +90,7 @@ contract AvianRentExchange is ReentrancyGuard {
 
     // state variables to match as in the proxy context (order should be maintained)
 
-    address private _marketOwner;
+    address private marketOwner;
 
     uint256 private _listingFee = .01 ether;
 
@@ -105,10 +102,8 @@ contract AvianRentExchange is ReentrancyGuard {
 
     EnumerableSet.AddressSet private r_address;
 
-    Counters.Counter private r_listed;
-
     constructor() {
-        _marketOwner = msg.sender;
+        marketOwner = msg.sender;
     }
 
     // Listing Functionality
@@ -131,7 +126,7 @@ contract AvianRentExchange is ReentrancyGuard {
             revert NotApprovedForMarketplace();
         }
 
-        payable(_marketOwner).transfer(_listingFee);
+        payable(marketOwner).transfer(_listingFee);
 
         r_listings[nftAddress][tokenId] = Listing_rent(
             msg.sender,
@@ -142,7 +137,6 @@ contract AvianRentExchange is ReentrancyGuard {
             0
         );
 
-        r_listed.increment();
         EnumerableSet.add(r_address_tokens[nftAddress], tokenId);
         EnumerableSet.add(r_address, nftAddress);
         
@@ -176,7 +170,6 @@ contract AvianRentExchange is ReentrancyGuard {
         if (EnumerableSet.length(r_address_tokens[nftAddress]) == 0) {
             EnumerableSet.remove(r_address, nftAddress);
         }
-        r_listed.decrement();
 
         emit NFTUnlisted(
             msg.sender,
@@ -252,7 +245,6 @@ contract AvianRentExchange is ReentrancyGuard {
         if (EnumerableSet.length(r_address_tokens[nftAddress]) == 0) {
             EnumerableSet.remove(r_address, nftAddress);
         }
-        r_listed.decrement();
 
         emit NFTRented(
             IERC721(nftAddress).ownerOf(tokenId),

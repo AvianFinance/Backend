@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/interfaces/IERC721.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 error PriceNotMet(address nftAddress, uint256 tokenId, uint256 price);
 error ItemNotForSale(address nftAddress, uint256 tokenId);
@@ -19,7 +18,6 @@ error PriceMustBeAboveZero();
 
 contract AvianSellExchange is ReentrancyGuard {
 
-    using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -88,7 +86,7 @@ contract AvianSellExchange is ReentrancyGuard {
 
     // state variables to match as in the proxy context (order should be maintained)
 
-    address private _marketOwner;
+    address private marketOwner;
 
     uint256 private _listingFee = .01 ether;
 
@@ -100,10 +98,8 @@ contract AvianSellExchange is ReentrancyGuard {
 
     EnumerableSet.AddressSet private s_address; 
 
-    Counters.Counter private s_listed;
-
     constructor() {
-        _marketOwner = msg.sender;
+        marketOwner = msg.sender;
     }
 
     // Listing Functionality
@@ -126,7 +122,6 @@ contract AvianSellExchange is ReentrancyGuard {
 
         s_listings[nftAddress][tokenId] = Listing_sell(msg.sender,nftAddress,tokenId,price);
 
-        s_listed.increment();
         EnumerableSet.add(s_address_tokens[nftAddress], tokenId);
         EnumerableSet.add(s_address, nftAddress);
 
@@ -151,7 +146,6 @@ contract AvianSellExchange is ReentrancyGuard {
         if (EnumerableSet.length(s_address_tokens[nftAddress]) == 0) {
             EnumerableSet.remove(s_address, nftAddress);
         }
-        s_listed.decrement();
 
         emit ItemCanceled(msg.sender, nftAddress, tokenId);
         return("NFT unlisted successfully");
@@ -186,7 +180,6 @@ contract AvianSellExchange is ReentrancyGuard {
         if (EnumerableSet.length(s_address_tokens[nftAddress]) == 0) {
             EnumerableSet.remove(s_address, nftAddress);
         }
-        s_listed.decrement();
 
         IERC721(nftAddress).safeTransferFrom(listedItem.owner, msg.sender, tokenId);
         emit ItemBought(msg.sender, nftAddress, tokenId, listedItem.price);
