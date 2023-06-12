@@ -214,6 +214,11 @@ contract AvianInsExchange is ReentrancyGuard {
         listing.installmentIndex = 1;
         listing.paidIns = firstIns;
 
+        EnumerableSet.remove(i_address_tokens[nftAddress], tokenId);
+        if (EnumerableSet.length(i_address_tokens[nftAddress]) == 0) {
+            EnumerableSet.remove(i_address, nftAddress);
+        }
+
         emit NFTINSPaid(
             IERC721(nftAddress).ownerOf(tokenId),
             msg.sender,
@@ -292,6 +297,9 @@ contract AvianInsExchange is ReentrancyGuard {
         listing.installmentIndex = nextIndex;
         listing.paidIns = totalPaid;
 
+        if (listing.installmentIndex == listing.installmentCount){
+            delete i_listings[nftAddress][tokenId];
+        }
 
         emit NFTINSPaid(
             IERC721(nftAddress).ownerOf(tokenId),
