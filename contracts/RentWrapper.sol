@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.0;
 
 import "./ERC4907.sol";
@@ -52,5 +51,4 @@ contract RentWrapper is ERC4907, IWrapper, IERC721Receiver {
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         return ERC721(_generalToken).tokenURI(tokenId);
     }
-
 }

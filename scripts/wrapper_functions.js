@@ -1,5 +1,8 @@
 const { ethers } = require("hardhat")
 const fs = require('fs');
+//Commented due to circular dependency issue: No usage in this file
+// const { wrapper_handler } = require("../faucet_wrapper");
+const { wrapper_list } = require("../config");
 
 const WrapperContract = JSON.parse(fs.readFileSync('./artifacts/contracts/RentWrapper.sol/RentWrapper.json', 'utf-8'))
 const RentContract = JSON.parse(fs.readFileSync('./artifacts/contracts/AVFXRent.sol/AVFXRent.json', 'utf-8'))
@@ -39,8 +42,14 @@ async function WithdrawNFT(wrapper_address,tokenId,signer) {
     return("For future tradings please use ", base_contract_address, "with token id :", tokenId.toString())
 }
 
+function readWrapperList(){
+    let wrapper_list = []
+    wrapper_list = fs.readFileSync("./wrapper_config.txt", "utf-8").split("\n").slice(0, -1);
+    return wrapper_list
+}
 
 module.exports = {
     DepositNFT,
-    WithdrawNFT
+    WithdrawNFT,
+    readWrapperList
 };

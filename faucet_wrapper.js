@@ -1,8 +1,8 @@
 const { get_signer } = require('./services/token_standard')
 const {deploy_rentalWrapper} = require('./deploy/deploy_RentWrapper')
-const {DepositNFT, WithdrawNFT} = require('./scripts/wrapper_functions')
+const {DepositNFT, WithdrawNFT, readWrapperList} = require('./scripts/wrapper_functions')
 const {getUserInputText,getUserInputInt, getUserInputFromDropdown} = require('./services/cli-commands')
-const { wrapper_list } = require('./config')
+const wrapper_list = readWrapperList();
 
 const provides = ['Wrap a Collection', 'Deposit an NFT','Withdraw an NFT','Go Back'];
 
@@ -38,7 +38,6 @@ async function wrapper_handler(){
             console.log("No Option Selected");
         }
 }
-
 
 module.exports = {
     wrapper_handler
