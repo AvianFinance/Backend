@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/interfaces/IERC721.sol";
 import "./IERC4907.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 error PriceNotMet(address nftAddress, uint256 tokenId, uint256 price);
 error ItemNotForSale(address nftAddress, uint256 tokenId);
@@ -17,10 +16,8 @@ error NotOwner();
 error NotApprovedForMarketplace();
 error PriceMustBeAboveZero();
 
-
 contract AvianInsExchange is ReentrancyGuard {
 
-    using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -112,8 +109,6 @@ contract AvianInsExchange is ReentrancyGuard {
 
     EnumerableSet.AddressSet private i_address; 
 
-    Counters.Counter private i_listed;
-
     constructor() {
         _marketOwner = msg.sender;
     }
@@ -123,20 +118,16 @@ contract AvianInsExchange is ReentrancyGuard {
     function listInsBasedNFT(
         address nftAddress,
         uint256 tokenId,
-        uint256 pricePerDay
+        uint256 price
     ) public payable 
         nonReentrant 
         notIListed(nftAddress, tokenId)
     returns(string memory) {
+        require(MarketplaceIsApproved(nftAddress, tokenId),"Marketplace is not aproved");
         require(isRentableNFT(nftAddress), "Contract is not an ERC4907");
         require(IERC721(nftAddress).ownerOf(tokenId) == msg.sender, "Not owner of nft");
         require(msg.value == _listingFee, "Not enough ether for listing fee");
-        require(pricePerDay > 0, "Rental price should be greater than 0");
-
-        IERC721 nft = IERC721(nftAddress);
-        if (nft.getApproved(tokenId) != address(this)) {
-            revert NotApprovedForMarketplace();
-        }
+        require(price > 0, "Price should be greater than 0");
 
         payable(_marketOwner).transfer(_listingFee);
 
@@ -145,14 +136,13 @@ contract AvianInsExchange is ReentrancyGuard {
             address(0),
             nftAddress,
             tokenId,
-            pricePerDay,
+            price,
             0,
             0,
             0,
             0
         );
 
-        i_listed.increment();
         EnumerableSet.add(i_address_tokens[nftAddress], tokenId);
         EnumerableSet.add(i_address, nftAddress);
         
@@ -161,7 +151,7 @@ contract AvianInsExchange is ReentrancyGuard {
             address(0),
             nftAddress,
             tokenId,
-            pricePerDay
+            price
         );
 
         return("Successfully listed the NFT for installment based rentals");
@@ -178,13 +168,10 @@ contract AvianInsExchange is ReentrancyGuard {
         isIListed(nftAddress, tokenId)
     returns(string memory){ 
         EnumerableSet.remove(i_address_tokens[nftAddress], tokenId);
-
         delete i_listings[nftAddress][tokenId];
-
         if (EnumerableSet.length(i_address_tokens[nftAddress]) == 0) {
             EnumerableSet.remove(i_address, nftAddress);
         }
-        i_listed.decrement();
 
         emit NFTUnlisted(
             msg.sender,
@@ -198,23 +185,19 @@ contract AvianInsExchange is ReentrancyGuard {
     // rent functionality
 
     function rentINSNFT(
-        address nftContract,
+        address nftAddress,
         uint256 tokenId,
         uint64 numDays
     ) public payable 
         nonReentrant 
     returns(string memory){
+        require(MarketplaceIsApproved(nftAddress, tokenId),"Marketplace is not aproved");
         require(numDays <= _maxInstallments, "Maximum of 10 rental days are allowed");
         require(numDays > 1, "Number of installments must be greater than 1");
 
-        Listing_installment storage listing = i_listings[nftContract][tokenId];
+        Listing_installment storage listing = i_listings[nftAddress][tokenId];
 
         require(listing.user == address(0) || block.timestamp > listing.expires, "NFT already rented");
-
-        IERC721 nft = IERC721(nftContract);
-        if (nft.getApproved(tokenId) != address(this)) {
-            revert NotApprovedForMarketplace();
-        }
 
         uint64 expires = uint64(block.timestamp) + 86400;
         
@@ -224,7 +207,7 @@ contract AvianInsExchange is ReentrancyGuard {
         payable(listing.owner).transfer(firstIns);
 
         // Update listing
-        IERC4907(nftContract).setUser(tokenId, msg.sender, expires);
+        IERC4907(nftAddress).setUser(tokenId, msg.sender, expires);
         listing.user = msg.sender;
         listing.expires = expires;
         listing.installmentCount = numDays;
@@ -232,9 +215,9 @@ contract AvianInsExchange is ReentrancyGuard {
         listing.paidIns = firstIns;
 
         emit NFTINSPaid(
-            IERC721(nftContract).ownerOf(tokenId),
+            IERC721(nftAddress).ownerOf(tokenId),
             msg.sender,
-            nftContract,
+            nftAddress,
             tokenId,
             expires,
             numDays,
@@ -278,22 +261,18 @@ contract AvianInsExchange is ReentrancyGuard {
     // installment payment functionality
 
     function payNFTIns(
-        address nftContract,
+        address nftAddress,
         uint256 tokenId
     ) public payable 
         nonReentrant 
     returns(string memory){
-        Listing_installment storage listing = i_listings[nftContract][tokenId];
+        require(MarketplaceIsApproved(nftAddress, tokenId),"Marketplace is not aproved");
+        Listing_installment storage listing = i_listings[nftAddress][tokenId];
 
         require(listing.user == msg.sender, "You are not the current renter");
         require(listing.installmentIndex < listing.installmentCount, "Rental fee is fully paid");
         require(listing.installmentIndex >= 1, "Rental agreement not yet made");
         require(block.timestamp < listing.expires, "NFT expired");
-
-        IERC721 nft = IERC721(nftContract);
-        if (nft.getApproved(tokenId) != address(this)) {
-            revert NotApprovedForMarketplace();
-        }
 
         uint64 expires = listing.expires + 86400;
         uint64 currIndex = listing.installmentIndex;
@@ -306,7 +285,7 @@ contract AvianInsExchange is ReentrancyGuard {
 
         listing.expires = expires;
 
-        IERC4907(nftContract).setUser(tokenId, msg.sender, expires);
+        IERC4907(nftAddress).setUser(tokenId, msg.sender, expires);
 
         uint256 totalPaid = listing.paidIns + nextIns;
 
@@ -315,9 +294,9 @@ contract AvianInsExchange is ReentrancyGuard {
 
 
         emit NFTINSPaid(
-            IERC721(nftContract).ownerOf(tokenId),
+            IERC721(nftAddress).ownerOf(tokenId),
             msg.sender,
-            nftContract,
+            nftAddress,
             tokenId,
             expires,
             listing.installmentCount,
@@ -358,5 +337,14 @@ contract AvianInsExchange is ReentrancyGuard {
             return false;
         }
         return _isNFT;
+    }
+
+    function MarketplaceIsApproved(address nftAddress, uint256 tokenId) internal view returns (bool) {
+        IERC721 nft = IERC721(nftAddress);
+        if (nft.getApproved(tokenId) != address(this)) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

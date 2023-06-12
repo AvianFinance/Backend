@@ -17,7 +17,7 @@ error NotApprovedForMarketplace();
 error PriceMustBeAboveZero();
 
 contract AvianRentExchange is ReentrancyGuard {
-
+    
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -111,20 +111,16 @@ contract AvianRentExchange is ReentrancyGuard {
     function listNFT(
         address nftAddress,
         uint256 tokenId,
-        uint256 pricePerDay
+        uint256 price
     ) external payable 
         nonReentrant 
         notRListed(nftAddress, tokenId)
     returns (string memory) {
+        require(MarketplaceIsApproved(nftAddress, tokenId),"Marketplace is not aproved");
         require(isRentableNFT(nftAddress), "Contract is not an ERC4907");
         require(IERC721(nftAddress).ownerOf(tokenId) == msg.sender, "Not owner of nft");
         require(msg.value == _listingFee, "Not enough ether for listing fee");
-        require(pricePerDay > 0, "Rental price should be greater than 0");
-
-        IERC721 nft = IERC721(nftAddress);
-        if (nft.getApproved(tokenId) != address(this)) {
-            revert NotApprovedForMarketplace();
-        }
+        require(price > 0, "Price should be greater than 0");
 
         payable(marketOwner).transfer(_listingFee);
 
@@ -133,7 +129,7 @@ contract AvianRentExchange is ReentrancyGuard {
             address(0),
             nftAddress,
             tokenId,
-            pricePerDay,
+            price,
             0
         );
 
@@ -145,7 +141,7 @@ contract AvianRentExchange is ReentrancyGuard {
             address(0),
             nftAddress,
             tokenId,
-            pricePerDay,
+            price,
             0
         );
 
@@ -164,9 +160,7 @@ contract AvianRentExchange is ReentrancyGuard {
         isRListed(nftAddress, tokenId)
     returns (string memory) { 
         EnumerableSet.remove(r_address_tokens[nftAddress], tokenId);
-
         delete r_listings[nftAddress][tokenId];
-
         if (EnumerableSet.length(r_address_tokens[nftAddress]) == 0) {
             EnumerableSet.remove(r_address, nftAddress);
         }
@@ -185,25 +179,24 @@ contract AvianRentExchange is ReentrancyGuard {
     function updateRentNFT(
         address nftAddress,
         uint256 tokenId,
-        uint256 pricePerDay
+        uint256 price
     ) external
         nonReentrant 
         isRListed(nftAddress, tokenId)
     returns (string memory) {
-        require(isRentableNFT(nftAddress), "Contract is not an ERC4907");
         require(IERC721(nftAddress).ownerOf(tokenId) == msg.sender, "Not owner of nft");
-        require(pricePerDay > 0, "Rental price should be greater than 0");
+        require(price > 0, "Price should be greater than 0");
 
         Listing_rent storage listing = r_listings[nftAddress][tokenId];
 
-        listing.pricePerDay = pricePerDay;
+        listing.pricePerDay = price;
 
         emit NFTListed(
             listing.owner,
             listing.user,
             nftAddress,
             tokenId,
-            pricePerDay,
+            price,
             listing.expires
         );
 
@@ -218,27 +211,25 @@ contract AvianRentExchange is ReentrancyGuard {
         uint64 numDays
     ) external payable 
         nonReentrant 
+        isRListed(nftAddress, tokenId)
     returns(string memory) {
+        require(MarketplaceIsApproved(nftAddress, tokenId),"Marketplace is not aproved");
         require(numDays <= _maxInstallments, "Maximum of 10 rental days are allowed");
+        require(isNotRented(nftAddress, tokenId), "NFT Already rented");
 
         Listing_rent storage listing = r_listings[nftAddress][tokenId];
-        require(listing.user == address(0) || block.timestamp > listing.expires, "NFT already rented");
-
-        IERC721 nft = IERC721(nftAddress);
-        if (nft.getApproved(tokenId) != address(this)) {
-            revert NotApprovedForMarketplace();
-        }
-
-        uint64 expires = uint64(block.timestamp) + (numDays*86400);
     
         uint256 rentalFee = listing.pricePerDay * numDays;
         require(msg.value >= rentalFee, "Not enough ether to cover rental period");
-        payable(listing.owner).transfer(rentalFee);
+
+        uint64 expires = uint64(block.timestamp) + (numDays*86400);
 
         // Update listing
         IERC4907(nftAddress).setUser(tokenId, msg.sender, expires);
         listing.user = msg.sender;
         listing.expires = expires;
+
+        payable(listing.owner).transfer(rentalFee);
 
         EnumerableSet.remove(r_address_tokens[nftAddress], tokenId);
         delete r_listings[nftAddress][tokenId];
@@ -285,5 +276,28 @@ contract AvianRentExchange is ReentrancyGuard {
             return false;
         }
         return _isNFT;
+    }
+
+    function MarketplaceIsApproved(address nftAddress, uint256 tokenId) internal view returns (bool) {
+        IERC721 nft = IERC721(nftAddress);
+        if (nft.getApproved(tokenId) != address(this)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    function isNotRented(address nftAddress, uint256 tokenId) internal view returns (bool) {
+        if (isRentableNFT(nftAddress)){
+            IERC4907 nft = IERC4907(nftAddress);
+            uint256 expiry = nft.userExpires(tokenId);
+            if (block.timestamp < expiry) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return true;
+        }
     }
 }

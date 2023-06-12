@@ -4,14 +4,14 @@ require("@nomiclabs/hardhat-ethers");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 
-const PRIVATE_KEY = "986815db062b75efa84cd38ea93e08e9e13a42ee9493f756c1bc661d06201e68"
+const PRIVATE_KEY = "7e0dd21cba3952c769b9a90376893a351d4ac356aeacd0e537f5022e08593528"
 
 module.exports = {
   solidity: "0.8.17",
   defaultNetwork: "avalanche_fuji",
   networks: {
     avalanche_fuji: {
-      url: "https://avalanche-fuji.infura.io/v3/af80fbafec67441595f581fbeb7c8f1e", //"https://api.avax-test.network/ext/bc/C/rpc",
+      url: "https://api.avax-test.network/ext/bc/C/rpc",//"https://avalanche-fuji.infura.io/v3/af80fbafec67441595f581fbeb7c8f1e", //"https://api.avax-test.network/ext/bc/C/rpc",
       accounts: [`0x${PRIVATE_KEY}`]
     }
   }
