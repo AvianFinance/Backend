@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/interfaces/IERC721.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 error PriceNotMet(address nftAddress, uint256 tokenId, uint256 price);
 error ItemNotForSale(address nftAddress, uint256 tokenId);
@@ -20,7 +19,6 @@ error PriceMustBeAboveZero();
 
 contract ASE_Proxy is ReentrancyGuard {
 
-    using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -33,8 +31,8 @@ contract ASE_Proxy is ReentrancyGuard {
 
     struct VotingProposal {
         address contractAddress;
-        uint256 voter1;
-        uint256 voter2;
+        uint8 voter1;
+        uint8 voter2;
     }
 
     event ItemListed(
@@ -83,33 +81,10 @@ contract ASE_Proxy is ReentrancyGuard {
         _;
     }
 
-    modifier hasNotVoted() {
-        if(msg.sender == voter1){
-            require(pendingContract.voter1==0, "You have already voted on this proposal");
-        } 
-        if(msg.sender == voter2){
-            require(pendingContract.voter2==0, "You have already voted on this proposal");
-        } 
-        _;
-    }
-
-    modifier isOwner(
-        address nftAddress,
-        uint256 tokenId,
-        address spender
+    modifier isMarketOwner(
+        address ownerAddess
     ) {
-        IERC721 nft = IERC721(nftAddress);
-        address owner = nft.ownerOf(tokenId);
-        if (spender != owner) {
-            revert NotOwner();
-        }
-        _;
-    }
-
-    modifier isOwnerContract(
-        address owneraddess
-    ) {
-        if (_marketOwner != owneraddess) {
+        if (marketOwner != ownerAddess) {
             revert NotOwner();
         }
         _;
@@ -117,7 +92,7 @@ contract ASE_Proxy is ReentrancyGuard {
 
     // State Variables for the proxy
 
-    address private _marketOwner;
+    address private marketOwner;
 
     uint256 private _listingFee = .01 ether;
 
@@ -129,8 +104,6 @@ contract ASE_Proxy is ReentrancyGuard {
 
     EnumerableSet.AddressSet private s_address; 
 
-    Counters.Counter private s_listed;
-
     address private impl_sell;
 
     VotingProposal private pendingContract;
@@ -139,9 +112,9 @@ contract ASE_Proxy is ReentrancyGuard {
 
     address private voter2;
 
-    constructor(address _implContract, address address1, address address2) {
-        _marketOwner = msg.sender;
-        impl_sell = _implContract;
+    constructor(address implContract, address address1, address address2) {
+        marketOwner = msg.sender;
+        impl_sell = implContract;
         voter1 = address1;
         voter2 = address2;
     }
@@ -244,52 +217,61 @@ contract ASE_Proxy is ReentrancyGuard {
     function createVotingProposal(
         address cAddress
     ) external 
-        isOwnerContract(msg.sender) 
+        isMarketOwner(msg.sender) 
     {
         pendingContract.contractAddress = cAddress;
         pendingContract.voter1 = 0;
         pendingContract.voter2 = 0;
     }
 
-    function voteOnProposal(
-        bool supportChanges
-    ) external 
-        hasNotVoted() 
+    function voteOnProposal(bool supportChanges) external 
     {
         require((msg.sender == voter1 || msg.sender == voter2), "Not authorized to vote");
 
-        if (supportChanges) {
-            if (msg.sender == voter1) {
-                pendingContract.voter1 = 2;
-            } else {
-                pendingContract.voter2 = 2;
-            }
+        if (msg.sender == voter1) {
+            require(pendingContract.voter1==0, "You have already voted on this proposal");
+            pendingContract.voter1 = getResult(supportChanges);
         } else {
-            if (msg.sender == voter1) {
-                pendingContract.voter1 = 1;
-            } else {
-                pendingContract.voter2 = 1;
-            }
+            require(pendingContract.voter2==0, "You have already voted on this proposal");
+            pendingContract.voter2 = getResult(supportChanges);
+        }
+
+    }
+
+    function getResult(bool input) internal pure returns (uint8) {
+        if (input) {
+            return 2;
+        } else {
+            return 1;
         }
     }
 
-    function calculateVotingResult() public 
-        view 
-        returns (uint256) 
+    function isProposalApproved() public view returns (bool) {
+        uint8 totalVotes = pendingContract.voter1 + pendingContract.voter2;
+
+        if (totalVotes == 4) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // upgrade functionality
+
+    function updateImplContract() external
+        nonReentrant
+        isMarketOwner(msg.sender) 
     {
-        uint256 totalVotes = pendingContract.voter1 + pendingContract.voter2;
+        require(pendingContract.voter1 != 0 && pendingContract.voter2 != 0, "Voters have not completed voting");
+        require(pendingContract.voter1 ==2 && pendingContract.voter2 == 2, "Voters have not agreed on the proposal");
+        
+        impl_sell = pendingContract.contractAddress;
 
-        if (totalVotes == 0) {
-            return 0; // Proposal has no votes
-        } else if (pendingContract.voter1 == 1 && pendingContract.voter2 == 1) {
-            return 0; // Proposal is authorized
-        } else if (pendingContract.voter1 == 2 && pendingContract.voter2 == 2) {
-            return 2; // Proposal is not authorized
-        } else {
-            return 1; // Voting result is inconclusive
-        }
+        emit ImplUpgrade(
+            marketOwner,
+            impl_sell
+        );
     }
-
     // function to check whether a given token is 721 or not
 
     function isNFT(address nftContract) public view returns (bool) {
@@ -301,21 +283,6 @@ contract ASE_Proxy is ReentrancyGuard {
             return false;
         }
         return _isNFT;
-    }
-    // upgrade functionality
-
-    function updateImplContract() external
-        nonReentrant
-    {
-        require(msg.sender == _marketOwner, "marketplace can only be upgraded by the owner");
-        require(pendingContract.voter1 != 0 || pendingContract.voter2 != 0, "Voters have not completed voting");
-        require(pendingContract.voter1 ==2 && pendingContract.voter2 == 2, "Voters have not agreed on the proposal");
-        
-        impl_sell = pendingContract.contractAddress;
-        emit ImplUpgrade(
-            _marketOwner,
-            impl_sell
-        );
     }
 
     function getImplAddrs(

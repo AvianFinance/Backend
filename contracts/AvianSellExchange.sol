@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/interfaces/IERC721.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "./IERC4907.sol";
 
 error PriceNotMet(address nftAddress, uint256 tokenId, uint256 price);
 error ItemNotForSale(address nftAddress, uint256 tokenId);
@@ -16,10 +16,8 @@ error NotOwner();
 error NotApprovedForMarketplace();
 error PriceMustBeAboveZero();
 
-
 contract AvianSellExchange is ReentrancyGuard {
 
-    using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -88,7 +86,7 @@ contract AvianSellExchange is ReentrancyGuard {
 
     // state variables to match as in the proxy context (order should be maintained)
 
-    address private _marketOwner;
+    address private marketOwner;
 
     uint256 private _listingFee = .01 ether;
 
@@ -100,10 +98,8 @@ contract AvianSellExchange is ReentrancyGuard {
 
     EnumerableSet.AddressSet private s_address; 
 
-    Counters.Counter private s_listed;
-
     constructor() {
-        _marketOwner = msg.sender;
+        marketOwner = msg.sender;
     }
 
     // Listing Functionality
@@ -115,18 +111,13 @@ contract AvianSellExchange is ReentrancyGuard {
     ) external
         notSListed(nftAddress, tokenId)
     returns(string memory){
+        require(MarketplaceIsApproved(nftAddress, tokenId),"Marketplace is not aproved");
         require(isNFT(nftAddress), "Contract is not an ERC721");
         require(IERC721(nftAddress).ownerOf(tokenId) == msg.sender, "Not owner of nft");
         require(price > 0, "listing price should be greater than 0");
 
-        IERC721 nft = IERC721(nftAddress);
-        if (nft.getApproved(tokenId) != address(this)) {
-            revert NotApprovedForMarketplace();
-        }
-
         s_listings[nftAddress][tokenId] = Listing_sell(msg.sender,nftAddress,tokenId,price);
 
-        s_listed.increment();
         EnumerableSet.add(s_address_tokens[nftAddress], tokenId);
         EnumerableSet.add(s_address, nftAddress);
 
@@ -145,13 +136,10 @@ contract AvianSellExchange is ReentrancyGuard {
         isSListed(nftAddress, tokenId)
     returns(string memory){
         delete s_listings[nftAddress][tokenId];
-
         EnumerableSet.remove(s_address_tokens[nftAddress], tokenId);
-
         if (EnumerableSet.length(s_address_tokens[nftAddress]) == 0) {
             EnumerableSet.remove(s_address, nftAddress);
         }
-        s_listed.decrement();
 
         emit ItemCanceled(msg.sender, nftAddress, tokenId);
         return("NFT unlisted successfully");
@@ -167,11 +155,8 @@ contract AvianSellExchange is ReentrancyGuard {
         isSListed(nftAddress, tokenId)
         nonReentrant
     returns(string memory){
-
-        IERC721 nft = IERC721(nftAddress);
-        if (nft.getApproved(tokenId) != address(this)) {
-            revert NotApprovedForMarketplace();
-        }
+        require(MarketplaceIsApproved(nftAddress, tokenId),"Marketplace is not aproved");
+        require(isNotRented(nftAddress, tokenId), "NFT Already rented");
 
         Listing_sell memory listedItem = s_listings[nftAddress][tokenId];
         if (msg.value < listedItem.price) {
@@ -186,7 +171,6 @@ contract AvianSellExchange is ReentrancyGuard {
         if (EnumerableSet.length(s_address_tokens[nftAddress]) == 0) {
             EnumerableSet.remove(s_address, nftAddress);
         }
-        s_listed.decrement();
 
         IERC721(nftAddress).safeTransferFrom(listedItem.owner, msg.sender, tokenId);
         emit ItemBought(msg.sender, nftAddress, tokenId, listedItem.price);
@@ -238,5 +222,44 @@ contract AvianSellExchange is ReentrancyGuard {
             return false;
         }
         return _isNFT;
+    }
+
+    function isRentableNFT(address nftContract) public view returns (bool) {
+        bool _isRentable = false;
+        bool _isNFT = false;
+        try IERC165(nftContract).supportsInterface(type(IERC4907).interfaceId) returns (bool rentable) {
+            _isRentable = rentable;
+        } catch {
+            return false;
+        }
+        try IERC165(nftContract).supportsInterface(type(IERC721).interfaceId) returns (bool nft) {
+            _isNFT = nft;
+        } catch {
+            return false;
+        }
+        return _isRentable && _isNFT;
+    }
+
+    function MarketplaceIsApproved(address nftAddress, uint256 tokenId) internal view returns (bool) {
+        IERC721 nft = IERC721(nftAddress);
+        if (nft.getApproved(tokenId) != address(this)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    function isNotRented(address nftAddress, uint256 tokenId) internal view returns (bool) {
+        if (isRentableNFT(nftAddress)){
+            IERC4907 nft = IERC4907(nftAddress);
+            uint256 expiry = nft.userExpires(tokenId);
+            if (block.timestamp < expiry) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return true;
+        }
     }
 }
