@@ -19,10 +19,12 @@ async function ListNFT(tokenId,amount,signer,std) {
 
     console.log("Approving Marketplace as operator of NFT...")
     const approvalTx = await token_contract.approve(mplace_contract.address, tokenId)
+    console.log("Approval transaction: ", approvalTx)
     await approvalTx.wait(1)
 
     console.log("Listing NFT...")
     const tx = await mplace_contract.listItem(token_contract.address, tokenId, PRICE)
+    console.log("Listing transaction: ", tx)
 
     await tx.wait(1)
     console.log("NFT Listed with token ID: ", tokenId.toString())
@@ -42,6 +44,7 @@ async function cancelListing(tokenId,signer,std) {
 
     console.log("cancelling the NFT listing...")
     const tx = await mplace_contract.cancelListing(token_address, tokenId)
+    console.log("Unlisting transaction cancel: ", tx)
 
     await tx.wait(1)
 
@@ -59,6 +62,7 @@ async function UpdateListing(tokenId,price,signer,std) {
 
     console.log("Updating the NFT listing...")
     const tx = await mplace_contract.updateListing(token_address, tokenId, PRICE)
+    console.log("Updating the NFT listing transaction: ", tx)
 
     await tx.wait(1)
 
@@ -74,6 +78,7 @@ async function ViewASellListing(tokenId, signer, std) {
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getASListing(token_address, tokenId)
+    console.log("Retrieving NFT Listing data: ", tx)
 
     return("Listing data: ", tx)
 }
@@ -84,6 +89,7 @@ async function ViewSellListedAddrs(provider) {
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getSListedAdddresses() // Gives all the token addresses listed for selling
+    console.log("Retrieving NFT Listing data: ", tx)
 
     return("Listing data: ", tx)
 }
@@ -97,7 +103,7 @@ async function ViewSellListedAddrTokens(std,provider) {
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getSListedAdddressTokens(token_address) // when the token address is given gives the token ids listed for selling
-
+    console.log("Retrieving NFT Listing data: ", tx)
     return("Listing data: ", tx)
 }
 
@@ -116,6 +122,7 @@ async function buyNFT(tokenID,signer,std) {
     const tx = await mplace_contract.buyItem(token_address, tokenID, {
             value: price,
         })
+    console.log("Buying NFT transaction: ", tx)
     await tx.wait(1)
     return("NFT Bought!")
 }

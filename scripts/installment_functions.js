@@ -19,6 +19,7 @@ async function ListInsNFT(tokenId,pricePerDay,signer,std) {
 
     console.log("Approving Marketplace as operator of NFT...")
     const approvalTx = await token_contract.approve(mplace_contract.address, tokenId)
+    console.log("Approval transaction: ", approvalTx)
     await approvalTx.wait(1)
 
     const mintedBy = await token_contract.ownerOf(tokenId)
@@ -28,6 +29,7 @@ async function ListInsNFT(tokenId,pricePerDay,signer,std) {
     const tx = await mplace_contract.listInsBasedNFT(token_contract.address, tokenId, unitPrice, {
         value: listingFee,
     })
+    console.log("Listing transaction: ", tx)
 
     await tx.wait(1)
     console.log("NFT Listed with token ID: ", tokenId.toString())
@@ -47,6 +49,7 @@ async function unlist_nft(tokenId,signer,std) {
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     const tx = await mplace_contract.unlistINSNFT(token_contract.address, tokenId)
+    console.log("Unlisting transaction: ", tx)
 
     return("NFT Unlisted")
 }
@@ -67,6 +70,7 @@ async function rentInsNFT(tokenId,signer,std, numDays) {
     const tx = await mplace_contract.rentINSNFT(token_contract.address, tokenId, numDays,{
         value: firstIns,
     })
+    console.log("Renting transaction: ", tx)
 
     await tx.wait(1)
 
@@ -85,8 +89,9 @@ async function view_installment(tokenId,signer,std,rentaldays) {
     const token_contract = new ethers.Contract(token_address, nft_token.abi, signer)
 
     const tx = await mplace_contract.getNftInstallment(token_contract.address, tokenId, rentaldays)
+    console.log("Next installment : ",tx)
 
-    return("Next installment : ",tx)
+    return("view_installment : ",tx)
 }
 
 async function payNextIns(tokenId,signer,std) {
@@ -111,6 +116,7 @@ async function payNextIns(tokenId,signer,std) {
     const tx = await mplace_contract.payNFTIns(token_contract.address, tokenId,{
         value: nextIns,
     })
+    console.log("Installment payment transaction: ", tx)
 
     await tx.wait(1)
     return("Due installment paid !");
@@ -126,6 +132,7 @@ async function ViewAInsListing(tokenId, signer, std) {
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getAInsListing(token_address, tokenId)
+    console.log("Retrieving NFT listing data: ", tx)
 
     return("Listing data: ", tx)
 }
@@ -136,6 +143,7 @@ async function ViewInsListedAddrs(provider) {
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getInsListedAdddresses() // Gives all the token addresses listed for renting
+    console.log("Retrieving NFT listing data: ", tx)
 
     return("Listing data: ", tx)
 }
@@ -149,6 +157,7 @@ async function ViewInsListedAddrTokens(std,provider) {
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getInsListedAdddressTokens(token_address) // when the token address is given gives the token ids listed for renting
+    console.log("Retrieving NFT listing data: ", tx)
 
     return("Listing data: ", tx)
 }
@@ -159,6 +168,7 @@ async function ViewImplContract(provider) {
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getImplAddrs() // Get the implementation contract address
+    console.log("Retrieving NFT listing data: ", tx)
 
     return("Implementation Address: ", tx)
 }
@@ -168,6 +178,7 @@ async function UpdateImplContract(new_impl_addr,signer) {
     const mplace_contract = new ethers.Contract(installment_proxy_addr, InsMarketplace.abi, signer)
 
     const tx = await mplace_contract.updateImplContract(new_impl_addr)
+    console.log("Implementation Update transaction: ", tx)
 
     return("Implementation Updated")
 }

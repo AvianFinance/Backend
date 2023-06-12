@@ -9,6 +9,7 @@ async function pullProceeds(signer) {
 
     console.log("Retrieving proceeds for the signer...")
     const tx = await mplace_contract.withdrawProceeds()
+    console.log("pullProceeds: ", tx)
 
     return("proceeds: ", tx)
 }
@@ -19,6 +20,7 @@ async function viewProceeds(signer) {
 
     console.log("Retrieving proceeds for the signer...")
     const tx = await mplace_contract.getProceeds()
+    console.log("viewProceeds: ", tx)
 
     return("proceeds: ", tx)
 }

@@ -19,6 +19,7 @@ async function ListRentNFT(tokenId,amount,signer,std) {
 
     console.log("Approving Marketplace as operator of NFT...")
     const approvalTx = await token_contract.approve(mplace_contract.address, tokenId)
+    console.log("Approval transaction: ", approvalTx)
     await approvalTx.wait(1)
 
     const mintedBy = await token_contract.ownerOf(tokenId)
@@ -28,6 +29,7 @@ async function ListRentNFT(tokenId,amount,signer,std) {
     const tx = await mplace_contract.listNFT(token_contract.address, tokenId, PRICE,{
         value: listingFee,
     })
+    console.log("Listing transaction: ", tx)
 
     await tx.wait(1)
     console.log("NFT Listed with token ID: ", tokenId.toString())
@@ -48,6 +50,7 @@ async function cancelRentNFT(tokenId,signer,std) {
 
     console.log("cancelling rent NFT listing...")
     const tx = await mplace_contract.unlistNFT(token_contract.address, tokenId)
+    console.log("Unlisting transaction cancel: ", tx)
 
     await tx.wait(1)
     return("NFT unlisted with token ID: ", tokenId.toString())
@@ -67,6 +70,7 @@ async function updateRentNFT(tokenId,amount,signer,std) {
 
     console.log("updating rent NFT listing...")
     const tx = await mplace_contract.updateNFT(token_contract.address, tokenId, PRICE)
+    console.log("updating rent NFT listing transaction update: ", tx)
 
     await tx.wait(1)
     return("NFT with token ID, updated: ", tokenId.toString())
@@ -81,6 +85,7 @@ async function ViewARentListing(tokenId, signer, std) {
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getARListing(token_address, tokenId)
+    console.log("Retrieving NFT listing data data: ", tx)
 
     return("Listing data: ", tx)
 }
@@ -91,6 +96,7 @@ async function ViewRentListedAddrs(provider) {
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getRListedAdddresses() // Gives all the token addresses listed for renting
+    console.log("Retrieving NFT listing data data: ", tx)
 
     return("Listing data: ", tx)
 }
@@ -104,7 +110,7 @@ async function ViewRentListedAddrTokens(std,provider) {
 
     console.log("Retrieving NFT listing data...")
     const tx = await mplace_contract.getRListedAdddressTokens(token_address) // when the token address is given gives the token ids listed for renting
-
+    console.log("Retrieving NFT listing data data: ", tx)
     return("Listing data: ", tx)
 }
 
@@ -124,7 +130,8 @@ async function rentNFT(tokenID,signer,std,days) {
     const payment = ethers.utils.parseEther(price.toString())
 
     const txn = await mplace_contract.rentNFT(token_address, tokenID, days, {value: payment});
-
+    console.log("Renting transaction: ", txn)   
+    
     await txn.wait(1)
     return("NFT Rented!")
 }
