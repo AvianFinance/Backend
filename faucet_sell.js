@@ -3,11 +3,11 @@ const {getUserInputFromDropdown, getUserInputInt, getUserInputFloat} = require('
 const { pullProceeds, viewProceeds } = require('./scripts/get_proceeds')
 const { ListNFT, cancelListing,UpdateListing, ViewASellListing, ViewSellListedAddrs, ViewSellListedAddrTokens, buyNFT} = require('./scripts/sell_functions')
 
-stand = "ERC721" // token type : set correctly before initiating
-
 const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View all the listed collections', 'View the listed token ids of a collection','Update the price of a listed NFT','Buy a listed NFT','View the available proceeds','Obtain the available proceeds','Go Back'];
 
 async function sexchange_handler(){
+
+    stand = "ERC4907" // token type : set correctly before initiating
 
     const systemType = await getUserInputFromDropdown('Select the required functionality',provides)
     let start = Date.now();

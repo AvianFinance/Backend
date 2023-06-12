@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/interfaces/IERC721.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 error PriceNotMet(address nftAddress, uint256 tokenId, uint256 price);
 error ItemNotForSale(address nftAddress, uint256 tokenId);
@@ -20,7 +19,6 @@ error PriceMustBeAboveZero();
 
 contract ASE_Proxy is ReentrancyGuard {
 
-    using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -79,19 +77,6 @@ contract ASE_Proxy is ReentrancyGuard {
         Listing_sell memory listing = s_listings[nftAddress][tokenId];
         if (listing.price <= 0) {
             revert NotListed(nftAddress, tokenId);
-        }
-        _;
-    }
-
-    modifier isOwner(
-        address nftAddress,
-        uint256 tokenId,
-        address spender
-    ) {
-        IERC721 nft = IERC721(nftAddress);
-        address owner = nft.ownerOf(tokenId);
-        if (spender != owner) {
-            revert NotOwner();
         }
         _;
     }

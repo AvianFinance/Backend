@@ -12,6 +12,8 @@ async function ListNFT(tokenId,amount,signer,std) {
     const token_address = standard.addr;
     const nft_token = standard.token;
 
+    console.log(token_address)
+
     const PRICE = ethers.utils.parseEther(amount.toString())
 
     const mplace_contract = new ethers.Contract(sell_proxy_addr, Marketplace.abi, signer)
@@ -119,6 +121,7 @@ async function buyNFT(tokenID,signer,std) {
     const listing = await mplace_contract.getASListing(token_address, tokenID)
 
     const price = listing.price.toString()
+
     const tx = await mplace_contract.buyItem(token_address, tokenID, {
             value: price,
         })
