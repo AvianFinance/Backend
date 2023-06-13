@@ -297,10 +297,6 @@ contract AvianInsExchange is ReentrancyGuard {
         listing.installmentIndex = nextIndex;
         listing.paidIns = totalPaid;
 
-        if (listing.installmentIndex == listing.installmentCount){
-            delete i_listings[nftAddress][tokenId];
-        }
-
         emit NFTINSPaid(
             IERC721(nftAddress).ownerOf(tokenId),
             msg.sender,
@@ -312,6 +308,10 @@ contract AvianInsExchange is ReentrancyGuard {
             nextIns,
             totalPaid
         );
+
+        if (listing.installmentIndex == listing.installmentCount){
+            delete i_listings[nftAddress][tokenId];
+        }
 
         return("Successfully paid the installment");
     }
