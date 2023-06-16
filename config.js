@@ -4,9 +4,9 @@
 
 // sell_impl_addr = "0x1cFC2A85aFB1D21FaC1Db6cAa927907D41636F45"
 
-sell_proxy_addr = "0x73eC14508cBd2d2888C6E68a9F9A9df2bAEDF269"
-rent_proxy_addr = "0xC58500f8C3EE45224678222f760b8D71aD9e5A0c"
-installment_proxy_addr = "0x477df7985a4A8ec5aa94068327d388097C781Cb2"
+sell_proxy_addr = "0x2c90a561C9E68EF5f57EC65b1f09921CBe0f9430"
+rent_proxy_addr = "0xE77fc7f24fD13f111510bFAe3b1B0c2cEDf96FE9"
+installment_proxy_addr = "0x6A2160aEf2d94e64D34fA80dF3aE73baD3841f5D"
 rime_token   = "0x341696b0accdc3e3843b834857421b0cf975a3c9"
 rime_rent = "0xe8acd0db63262eb9bb905d6b9be9e3f4459bb907"
 
