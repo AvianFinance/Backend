@@ -1,9 +1,9 @@
 const { get_signer } = require('./services/token_standard')
 const {getUserInputFromDropdown, getUserInputInt, getUserInputFloat} = require('./services/cli-commands')
 const { pullProceeds, viewProceeds } = require('./scripts/get_proceeds')
-const { ListNFT, cancelListing,UpdateListing, ViewASellListing, ViewSellListedAddrs, ViewSellListedAddrTokens, buyNFT} = require('./scripts/sell_functions')
+const { ListNFT, cancelListing,UpdateListing, ViewASellListing, ViewSellListedAddrs, ViewSellListedAddrTokens, buyNFT, updateFee} = require('./scripts/sell_functions')
 
-const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View all the listed collections', 'View the listed token ids of a collection','Update the price of a listed NFT','Buy a listed NFT','View the available proceeds','Obtain the available proceeds','Go Back'];
+const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View all the listed collections', 'View the listed token ids of a collection','Update the price of a listed NFT','Buy a listed NFT','View the available proceeds','Obtain the available proceeds','Update Listing Fee','Go Back'];
 
 async function sexchange_handler(){
 
@@ -56,6 +56,11 @@ async function sexchange_handler(){
             const i_response = await pullProceeds(i_signer)
             return(i_response)
         case 9:
+            const j_signer = await get_signer(true);
+            const j_price = await getUserInputFloat("Input the new listing fee in AVAX");
+            const j_response = await updateFee(j_price, j_signer)
+            return(j_response)
+        case 10:
             return("Returning to the main menu");
         default:
             console.log("No Option Selected");

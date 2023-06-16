@@ -24,7 +24,7 @@ async function ListNFT(tokenId,amount,signer,std) {
     const mintedBy = await token_contract.ownerOf(tokenId)
     const listingFee = (await mplace_contract.getListingFee()).toString();
 
-    console.log("Listing NFT...")
+    console.log(`Listing NFT with ${listingFee} listing fee`)
     const tx = await mplace_contract.listItem(token_contract.address, tokenId, PRICE,{
         value: listingFee,
     })
@@ -124,6 +124,19 @@ async function buyNFT(tokenID,signer,std) {
     return("NFT Bought!")
 }
 
+async function updateFee(amount,signer) {
+
+    const PRICE = ethers.utils.parseEther(amount.toString())
+
+    const mplace_contract = new ethers.Contract(sell_proxy_addr, Marketplace.abi, signer)
+
+    console.log(`Listing NFT with ${listingFee} listing fee`)
+    const tx = await mplace_contract.updateListingFee(PRICE)
+    await tx.wait(1)
+
+    return(`Sell listing fee updated to ${tokenId}`)
+}
+
 module.exports = {
     ListNFT,
     cancelListing,
@@ -131,5 +144,6 @@ module.exports = {
     ViewASellListing,
     ViewSellListedAddrs,
     ViewSellListedAddrTokens,
-    buyNFT
+    buyNFT,
+    updateFee
 };

@@ -94,7 +94,7 @@ contract ASE_Proxy is ReentrancyGuard {
 
     address private marketOwner;
 
-    uint256 private _listingFee = .01 ether;
+    uint256 private _listingFee = 0 ether;
 
     mapping(address => mapping(uint256 => Listing_sell)) private s_listings;   
 
@@ -272,6 +272,14 @@ contract ASE_Proxy is ReentrancyGuard {
             impl_sell
         );
     }
+
+    function updateListingFee(uint256 newFee) external
+        nonReentrant
+        isMarketOwner(msg.sender) 
+    {
+        _listingFee = newFee;
+    }
+    
     // function to check whether a given token is 721 or not
 
     function isNFT(address nftContract) public view returns (bool) {
