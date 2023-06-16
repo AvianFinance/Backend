@@ -12,8 +12,6 @@ async function ListNFT(tokenId,amount,signer,std) {
     const token_address = standard.addr;
     const nft_token = standard.token;
 
-    console.log(token_address)
-
     const PRICE = ethers.utils.parseEther(amount.toString())
 
     const mplace_contract = new ethers.Contract(sell_proxy_addr, Marketplace.abi, signer)
@@ -23,13 +21,16 @@ async function ListNFT(tokenId,amount,signer,std) {
     const approvalTx = await token_contract.approve(mplace_contract.address, tokenId)
     await approvalTx.wait(1)
 
+    const mintedBy = await token_contract.ownerOf(tokenId)
+    const listingFee = (await mplace_contract.getListingFee()).toString();
+
     console.log("Listing NFT...")
-    const tx = await mplace_contract.listItem(token_contract.address, tokenId, PRICE)
+    const tx = await mplace_contract.listItem(token_contract.address, tokenId, PRICE,{
+        value: listingFee,
+    })
 
     await tx.wait(1)
     console.log("NFT Listed with token ID: ", tokenId.toString())
-
-    const mintedBy = await token_contract.ownerOf(tokenId)
 
     return(
         `NFT with ID ${tokenId} listed by owner ${mintedBy}.`)

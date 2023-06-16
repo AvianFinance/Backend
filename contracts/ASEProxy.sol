@@ -125,7 +125,7 @@ contract ASE_Proxy is ReentrancyGuard {
         address nftAddress,
         uint256 tokenId,
         uint256 price
-    ) external returns(string memory) {
+    ) external payable returns(string memory) {
         (bool success, bytes memory data) = impl_sell.delegatecall(abi.encodeWithSignature("listItem(address,uint256,uint256)", nftAddress, tokenId, price));
         require(success, "transaction failed");
         return(abi.decode(data, (string)));
@@ -290,5 +290,12 @@ contract ASE_Proxy is ReentrancyGuard {
         returns (address) 
     {
         return impl_sell;
+    }
+
+    function getListingFee(
+    ) public view 
+        returns (uint256) 
+    {
+        return _listingFee;
     }
 }

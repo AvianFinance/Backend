@@ -7,7 +7,7 @@ const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View a
 
 async function sexchange_handler(){
 
-    stand = "ERC4907" // token type : set correctly before initiating
+    stand = "ERC721" // token type : set correctly before initiating
 
     const systemType = await getUserInputFromDropdown('Select the required functionality',provides)
 
