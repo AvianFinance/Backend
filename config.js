@@ -2,9 +2,9 @@
 
 // rent_impl_addr = "0xAC8c93c74eE36Fd51158bf5904A1E5643044820C"
 
-// sell_impl_addr = "0x5246dd68CA784EB4211020111A08Daa94df87322"
+// sell_impl_addr = "0x359968801f5fc4d1EA8957B3D17DAAE89FCaC9EC"
 
-sell_proxy_addr = "0x98Ab8B1b58eEfc2eEeEd83765EF01F34c5D5A5B6"
+sell_proxy_addr = "0x6919Ee001942E19f3Bc1C8C367c864885ddbC0a9"
 rent_proxy_addr = "0xB9BcF37795c74dF75a743E73DD35CF4580f5E9e8"
 installment_proxy_addr = "0xF749FF6Ced38f1FbaBBDd07526daF3CB8f4d4961"
 

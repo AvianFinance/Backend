@@ -37,7 +37,7 @@ async function main() {  //Create the address for the RimeToken collection
     const impl_token = await impl.deploy();
     await impl_token.deployed();
 
-    const proxy_token = await proxy.deploy(impl_token.address,"0x74905182979646CD342F2d9F4af04e751683c80e","0x74905182979646CD342F2d9F4af04e751683c80e");
+    const proxy_token = await proxy.deploy(impl_token.address,"0x741921be0fbc23789724eb8D8C7e11e877a3dCfC","0xCD5729c9B2963FaaeaDAABBE2a402bC374D70547");
     await proxy_token.deployed();
 
     console.log("MarketPlace deployed successfully !");
