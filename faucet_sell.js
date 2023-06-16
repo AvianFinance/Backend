@@ -7,9 +7,10 @@ const provides = ['List an NFT', 'Unlist an NFT','View a Single listing','View a
 
 async function sexchange_handler(){
 
-    stand = "ERC4907" // token type : set correctly before initiating
+    stand = "ERC721" // token type : set correctly before initiating
 
     const systemType = await getUserInputFromDropdown('Select the required functionality',provides)
+    let start = Date.now();
 
     switch(systemType) {
         case 0:
@@ -17,49 +18,61 @@ async function sexchange_handler(){
             const a_token_ID = await getUserInputInt("Input the token id of the nft");
             const a_price = await getUserInputFloat("Input the price in AVAX");
             const a_response = await ListNFT(a_token_ID,a_price,a_signer,stand);
+            console.log(provides[0] + " : ",Date.now() - start);
             return(a_response);
         case 1:
             const b_signer = await get_signer(true);
             const b_token_ID = await getUserInputInt("Input the token id of the nft");
             const b_response = await cancelListing(b_token_ID,b_signer,stand);
+            console.log(provides[1] + " : ",Date.now() - start);
             return(b_response);
         case 2:
             const c_provider = await get_signer(false);
             const c_token_ID = await getUserInputInt("Input the token id of the nft");
             const c_response = await ViewASellListing(c_token_ID,c_provider,stand);
+            console.log(provides[2] + " : ",Date.now() - start);
             return(c_response);
         case 3:
             const d_provider = await get_signer(false);
             const d_response = await ViewSellListedAddrs(d_provider);
+            console.log(provides[3] + " : ",Date.now() - start);
             return(d_response);
         case 4:
             const e_provider = await get_signer(false);
             const e_response = await ViewSellListedAddrTokens(stand,e_provider);
+            console.log(provides[4] + " : ",Date.now() - start);
             return(e_response)
         case 5:
             const f_signer = await get_signer(true);
             const f_token_ID = await getUserInputInt("Input the token id of the nft");
             const f_price = await getUserInputFloat("Input the price in AVAX");
             const f_response = await UpdateListing(f_token_ID,f_price,f_signer,stand) 
+            console.log(provides[5] + " : ",Date.now() - start);
             return(f_response);
         case 6:
             const g_signer = await get_signer(true);
             const g_token_ID = await getUserInputInt("Input the token id of the nft");
             const g_response = await buyNFT(g_token_ID,g_signer,stand) 
+            console.log(provides[6] + " : ",Date.now() - start);
             return(g_response);
         case 7:
             const h_signer = await get_signer(true);
             const h_response = await viewProceeds(h_signer);
+            console.log(provides[7] + " : ",Date.now() - start);
             return(h_response);
         case 8:
             const i_signer = await get_signer(true);
             const i_response = await pullProceeds(i_signer)
+            console.log(provides[8] + " : ",Date.now() - start);
             return(i_response)
         case 9:
             return("Returning to the main menu");
         default:
             console.log("No Option Selected");
         }
+
+
+    
 }
 
 
