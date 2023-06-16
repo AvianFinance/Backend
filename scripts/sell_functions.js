@@ -130,11 +130,10 @@ async function updateFee(amount,signer) {
 
     const mplace_contract = new ethers.Contract(sell_proxy_addr, Marketplace.abi, signer)
 
-    console.log(`Listing NFT with ${listingFee} listing fee`)
     const tx = await mplace_contract.updateListingFee(PRICE)
     await tx.wait(1)
 
-    return(`Sell listing fee updated to ${tokenId}`)
+    return(`Sell listing fee updated to ${amount}`)
 }
 
 module.exports = {
